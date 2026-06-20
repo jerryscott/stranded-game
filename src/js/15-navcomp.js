@@ -3,27 +3,31 @@
    ========================================================== */
 function navComp(){
   if (!S.decoded){
-    log("Find that black obelisk and decode it — the ring fancies the number seven. Then we'll know what the ship needs.", "nav");
+    log("Find that black obelisk and decode it — the ring fancies the number seven. The message will point you toward the water.", "nav");
+    return;
+  }
+  if (!has("repair_manual")){
+    log("The obelisk hinted at the pod — something buoyant that grows out here. Build a raft and cross the water. The ship repair manual you'll need is somewhere out on the lake.", "nav");
     return;
   }
   const miss = REQUIRED.filter(id => !has(id));
-  const N = { coolant_cell:"Coolant Cell", flux_coil:"Flux Coil", green_keycard:"Green Keycard" };
+  const N = { coolant_cell:"Coolant Cell", flux_coil:"Flux Coil", green_keycard:"Green Keycard", repair_manual:"Ship Repair Manual" };
   if (miss.length){
-    log("You still need: " + miss.map(m=>N[m]).join(", ") + ". The keycard's in that vending machine — but it needs power first (mind the red wire). Then haul everything to the transport.", "nav");
+    log("You still need: " + miss.map(m=>N[m]||m).join(", ") + ". The keycard's in that vending machine — but it needs power first (mind the red wire). Then haul everything to the transport.", "nav");
   } else {
-    log("You've got all three parts. Get them to the TRANSPORT and launch.", "nav");
+    log("You've got all the parts and the manual. Get to the TRANSPORT and launch.", "nav");
   }
-  if (!S.hasRaft) log("If you fancy what's across the water: that's a death-swim. Find driftwood, vines, and something that floats, then lash a raft at the shore.", "nav");
+  if (!S.hasRaft) log("To cross the water: find driftwood, vines, and Dopehtesu pods — those huge waxy things — then lash a raft at the shore.", "nav");
 }
 
 function attemptEscape(){
-  if (!S.decoded){ log("You poke at the transport's controls and realize you've no idea what it needs. Decode the obelisk first.", "bad"); return; }
+  if (!has("repair_manual")){ log("You poke at the transport's controls. Nothing makes sense without the repair manual. Find it — it's out on the water somewhere.", "bad"); return; }
   const miss = REQUIRED.filter(id => !has(id));
   if (miss.length){ log("The transport's still missing parts. Can't hot-wire a starship with vibes. Go finish scavenging.", "bad"); return; }
   S.over = true;
-  log("You slam the COOLANT CELL, FLUX COIL, and GREEN KEYCARD into place. The engine coughs, catches, ROARS, and you punch up through the canopy as the impending doom screeches in the distance.", "good");
+  log("You slot the COOLANT CELL, FLUX COIL, and GREEN KEYCARD into their housings — the manual open on your knee. The engine coughs, catches, ROARS, and you punch up through the canopy as the impending doom screeches in the distance.", "good");
   log("Took you long enough.", "nav");
-  log("\n★ YOU ESCAPED. ★\n— END OF ITERATION 5 —", "good");
+  log("\n★ YOU ESCAPED. ★\n— END OF ITERATION 7 —", "good");
   refresh();
 }
 

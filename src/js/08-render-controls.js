@@ -3,6 +3,9 @@
    ========================================================== */
 function buildActions(){
   const h = H(S.cur), acts = [];
+  if (S.submap && S.cur === BLDG[S.submap].entryHex){
+    acts.push({ label:"Exit the building", fn: exitBuilding });
+  }
   h.comps.forEach(c => {
     if (c.t==="col" && !c.taken && !c.hidden){
       const verb = c.consumable ? (c.kind==="water" ? "Drink the " : "Eat the ") : "Take the ";
@@ -20,7 +23,7 @@ function buildActions(){
     }
   });
   if (!S.hasRaft && nextToWater(S.cur) && RAFT_MAT.every(has)){
-    acts.push({ label:"Lash the driftwood, vines & foam into a raft", fn: buildRaft });
+    acts.push({ label:"Lash the driftwood, vines & Dopehtesu pods into a raft", fn: buildRaft });
   }
   return acts;
 }

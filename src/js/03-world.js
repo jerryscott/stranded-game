@@ -72,4 +72,5 @@ function initWorld(){
   buildLattice();
   applyBlockedEdges();
   applyBuildingWalls();
+  initBuildings();
 }

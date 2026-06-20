@@ -110,7 +110,7 @@ function waterBand(id, d){
 }
 
 function renderMap(){
-  const disc = Object.keys(HEXES).filter(k => H(k).disc);
+  const disc = Object.keys(activeHexes()).filter(k => H(k).disc);
   const cs = disc.map(center);
   let minx = Math.min(...cs.map(c=>c.x)), maxx = Math.max(...cs.map(c=>c.x));
   let miny = Math.min(...cs.map(c=>c.y)), maxy = Math.max(...cs.map(c=>c.y));
@@ -189,9 +189,14 @@ function renderMap(){
   g += halo + parch + bands + glyphs + trails + art + meds + labels + marker;
   g += `<rect x="${minx}" y="${miny}" width="${W}" height="${Ht}" filter="url(#rough)"/>`;
   g += `<rect x="${(minx+5).toFixed(1)}" y="${(miny+5).toFixed(1)}" width="${(W-10).toFixed(1)}" height="${(Ht-10).toFixed(1)}" fill="none" stroke="${INK}" stroke-width="2.5" rx="3"/>`;
-  const cxr = maxx-30, cyr = miny+32, s = 14;
-  g += `<circle cx="${cxr.toFixed(1)}" cy="${cyr.toFixed(1)}" r="${s+4}" fill="#efe0bb" stroke="${INK}" stroke-width="1.2"/><path d="M${cxr.toFixed(1)} ${(cyr-s).toFixed(1)} L${(cxr+s*0.24).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr+s).toFixed(1)} L${(cxr-s*0.24).toFixed(1)} ${cyr.toFixed(1)} Z" fill="${INK}"/><path d="M${(cxr-s).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr-s*0.24).toFixed(1)} L${(cxr+s).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr+s*0.24).toFixed(1)} Z" fill="${INK2}"/><text x="${cxr.toFixed(1)}" y="${(cyr-s-3).toFixed(1)}" text-anchor="middle" font-size="9" fill="${INK}">N</text>`;
-  g += `<text x="${(minx+16).toFixed(1)}" y="${(miny+24).toFixed(1)}" font-size="12" fill="${INK}" font-style="italic">~ Field Chart ~</text>`;
+  if (!S.submap){
+    const cxr = maxx-30, cyr = miny+32, s = 14;
+    g += `<circle cx="${cxr.toFixed(1)}" cy="${cyr.toFixed(1)}" r="${s+4}" fill="#efe0bb" stroke="${INK}" stroke-width="1.2"/><path d="M${cxr.toFixed(1)} ${(cyr-s).toFixed(1)} L${(cxr+s*0.24).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr+s).toFixed(1)} L${(cxr-s*0.24).toFixed(1)} ${cyr.toFixed(1)} Z" fill="${INK}"/><path d="M${(cxr-s).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr-s*0.24).toFixed(1)} L${(cxr+s).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr+s*0.24).toFixed(1)} Z" fill="${INK2}"/><text x="${cxr.toFixed(1)}" y="${(cyr-s-3).toFixed(1)}" text-anchor="middle" font-size="9" fill="${INK}">N</text>`;
+    g += `<text x="${(minx+16).toFixed(1)}" y="${(miny+24).toFixed(1)}" font-size="12" fill="${INK}" font-style="italic">~ Field Chart ~</text>`;
+  } else {
+    const bldgName = HEXES[S.submap] ? HEXES[S.submap].name : S.submap;
+    g += `<text x="${(minx+16).toFixed(1)}" y="${(miny+24).toFixed(1)}" font-size="12" fill="${INK}" font-style="italic">⌂ Interior: ${bldgName}</text>`;
+  }
   g += `</svg>`;
   $("map").innerHTML = g;
 }

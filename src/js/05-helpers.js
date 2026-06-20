@@ -2,11 +2,15 @@
    SECTION: HELPERS  (pure, no rendering)
    ========================================================== */
 const $ = id => document.getElementById(id);
-const H = id => HEXES[id];
+
+function activeHexes(){ return S.submap ? BLDG[S.submap].hexes   : HEXES; }
+function activeC2I()  { return S.submap ? BLDG[S.submap].coord2id : COORD2ID; }
+function activeBmap() { return S.submap ? BLDG[S.submap].bmap     : BMAP; }
+function H(id){ return activeHexes()[id]; }
 
 function posKey(id){ const p = H(id).pos; return p.x + "," + p.y; }
-function neighbor(id, dir){ const p = H(id).pos, d = DIRS[dir]; return COORD2ID[(p.x+d[0]) + "," + (p.y+d[1])] || null; }
-function edgeType(a, b){ return BMAP[[posKey(a), posKey(b)].sort().join("|")] || null; }
+function neighbor(id, dir){ const p = H(id).pos, d = DIRS[dir]; return activeC2I()[(p.x+d[0]) + "," + (p.y+d[1])] || null; }
+function edgeType(a, b){ return activeBmap()[[posKey(a), posKey(b)].sort().join("|")] || null; }
 
 function barrierKind(id, dir){
   const n = neighbor(id, dir);

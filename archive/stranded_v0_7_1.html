@@ -207,7 +207,7 @@ const DOOM_LIMIT = 150, DOOM_WARN = [0.5, 0.75, 0.9];
 const CIPHER_SHIFT = 7, LOCKER_CODE = "42";
 const DEHYDRATION_DMG = 10, LOW_WARN = 25;
 const REQUIRED = ["coolant_cell", "flux_coil", "green_keycard"];
-const RAFT_MAT = ["driftwood", "vines", "dopehtesu"];
+const RAFT_MAT = ["driftwood", "vines", "floatfoam"];
 
 
 /* ==========================================================
@@ -243,12 +243,18 @@ const SPECIAL = {
    desc:"A clear spring burbles over smooth stones in a shaft of sun. One stone is suspiciously, comically heavy.",
    comps:[{t:"col",id:"spring_water",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,renewable:true,effects:{hydration:45,health:5},grab:"You drink deep. Cold, clean, faintly minty. (+45 hydration, +5 health)"},
           {t:"col",id:"rock",name:"Suspiciously Heavy Rock",kind:"tool",icon:"🪨",grab:"You pocket the suspiciously heavy rock. It has the air of an object with One Job."}]},
- "1,-1.5":{id:"GENBUILDING",name:"Generator Building",terrain:"indoor",env:"outdoor",light:"lit",
-   desc:"A squat cinderblock outbuilding. One door faces southwest. A low hum leaks through the walls.",
-   comps:[{t:"man",id:"genbuilding_enter",name:"Generator Building",icon:"🏭",verb:"Enter the building"}]},
+ "1,-1.5":{id:"BUILD_GEN",name:"Generator Room",terrain:"indoor",env:"indoor",light:"dark",
+   desc:"A cinderblock outbuilding, dark and dead. A grimy breaker panel dominates one wall. A faded stencil beside it reads: \"GREEN = genny start.  RED = LIVE MAINS — DO NOT TOUCH.\" There's exactly one door, and you're standing in it, facing the obelisk.",
+   comps:[{t:"man",id:"power",name:"Breaker Panel",icon:"🔌",verb:"Fiddle with the breaker panel"}]},
+ "1,-2.5":{id:"BUILD_BREAK",name:"Break Room",terrain:"indoor",env:"indoor",light:"dark",
+   desc:"The other half of the building, through an interior doorway: a moldering break room. A vending machine looms in the corner, screen dark.",
+   comps:[{t:"col",id:"cola",name:"Warm TAB-ish Cola",kind:"water",icon:"🥤",consumable:true,effects:{hydration:20,health:-3},grab:"You crack a warm, flat, vaguely radioactive cola. (+20 hydration, -3 health)"},
+          {t:"man",id:"vendor",name:"Vending Machine",icon:"📟",verb:"Use the vending machine"},
+          {t:"col",id:"green_keycard",name:"Green Keycard",kind:"part",icon:"💳",required:true,hidden:true,grab:"You pluck the glowing GREEN KEYCARD from the tray. (repair part)"}]},
  "1,1.5":{id:"HATCH",name:"Cargo Hatch",terrain:"indoor",env:"indoor",light:"lit",
    desc:"A chunk of your pod's cargo section, hatch jammed shut, emergency lighting flickering inside.",
    comps:[{t:"man",id:"hatch",name:"Jammed Cargo Hatch",icon:"🚪",verb:"Override the hatch lock"},
+          {t:"col",id:"floatfoam",name:"Foam Crash-Padding",kind:"mat",icon:"🛟",grab:"You strip out a slab of buoyant foam crash-padding. Floats like a dream. (raft material)"},
           {t:"col",id:"coolant_cell",name:"Coolant Cell",kind:"part",icon:"🧊",required:true,hidden:true,grab:"You unstrap the COOLANT CELL from the bulkhead. (repair part)"},
           {t:"col",id:"phaser",name:"\"Phaser\" (label maker)",kind:"weapon",icon:"🔫",hidden:true,grab:"You claim the sleek 'phaser.' It's a label maker. It prints PEW."}]},
  "-2,1":{id:"STATION",name:"Ranger Station",terrain:"indoor",env:"indoor",light:"lit",
@@ -257,20 +263,18 @@ const SPECIAL = {
           {t:"col",id:"puffs",name:"Family-Size Cheese Puffs",kind:"food",icon:"🧀",consumable:true,effects:{health:8},grab:"You demolish a bag of radioactively orange cheese puffs. (+8 health)"},
           {t:"col",id:"flux_coil",name:"Flux Coil",kind:"part",icon:"🌀",required:true,hidden:true,grab:"You lift the FLUX COIL from its foam nest. (repair part)"}]},
  "2,1":{id:"LAKESHORE",name:"Lakeshore",terrain:"forest",env:"outdoor",light:"lit",
-   desc:"A pebbled shore. Driftwood lines the waterline. A cluster of alien plants crowds the bank — enormous waxy pods, each the size of a pillow.",
-   comps:[{t:"col",id:"driftwood",name:"Bundle of Driftwood",kind:"mat",icon:"🪵",grab:"You gather a bundle of sun-bleached driftwood. (raft material)"},
-          {t:"col",id:"dopehtesu",name:"Dopehtesu Pods",kind:"mat",icon:"🌿",grab:"You harvest a cluster of Dopehtesu pods — huge, waxy, absurdly buoyant. The locals (if there were any) would probably have a name for them. (raft material)"}]},
+   desc:"A pebbled shore. Driftwood and pale reeds line the waterline.",
+   comps:[{t:"col",id:"driftwood",name:"Bundle of Driftwood",kind:"mat",icon:"🪵",grab:"You gather a bundle of sun-bleached driftwood. (raft material)"}]},
  "-3,-1.5":{id:"SPRING2",name:"Hidden Spring",terrain:"water",env:"outdoor",light:"lit",
    desc:"A mossy cleft in the rock face seeps clear water into a shallow pool. Easy to miss — and easy to return to.",
    comps:[{t:"col",id:"spring_water2",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,renewable:true,effects:{hydration:45,health:5},grab:"You drink from the hidden spring. Cold and clean. (+45 hydration, +5 health)"}]},
  "-2,-1":{id:"VINE_THICKET",name:"Vine Thicket",terrain:"dense",env:"outdoor",light:"dark",
    desc:"A wall of rubbery alien vines, thick as fire hoses.",
    comps:[{t:"col",id:"vines",name:"Coil of Tough Vines",kind:"mat",icon:"🪢",grab:"You hack free a long coil of tough, ropy vines. (raft material)"}]},
- "2,0":{id:"LAKE",name:"The Lake",terrain:"lake",env:"outdoor",light:"lit",
-   desc:"You are out on the misty lake, riding low on your raft. Something waterlogged bobs against the hull.",
-   comps:[{t:"col",id:"lake_water",name:"Lake Water",kind:"water",icon:"🌊",consumable:true,effects:{hydration:30,health:-6},grab:"You scoop lake water over the side. Brackish, with a hint of ozone. (+30 hydration, -6 health)"},
-          {t:"col",id:"repair_manual",name:"Ship Repair Manual",kind:"part",icon:"📖",grab:"You fish out a waterlogged but readable SHIP REPAIR MANUAL. It lists what the transport needs: Coolant Cell, Flux Coil, Green Keycard. Now you know. (required reading)"}]},
- "3,0.5":{id:"DRONE",name:"Crashed Survey Drone",terrain:"ruin",env:"outdoor",light:"lit",
+ "3,0.5":{id:"LAKE",name:"The Lake",terrain:"lake",env:"outdoor",light:"lit",
+   desc:"You are out on the misty lake, riding low on your raft. The far shore resolves out of the fog.",
+   comps:[{t:"col",id:"lake_water",name:"Lake Water",kind:"water",icon:"🌊",consumable:true,effects:{hydration:30,health:-6},grab:"You scoop lake water over the side. Brackish, with a hint of ozone. (+30 hydration, -6 health)"}]},
+ "4,1":{id:"DRONE",name:"Crashed Survey Drone",terrain:"ruin",env:"outdoor",light:"lit",
    desc:"On the far shore, a crashed survey drone lies half-buried, panels splayed like a dead beetle.",
    comps:[{t:"man",id:"drone",name:"Drone Memory Core",icon:"📡",verb:"Read the drone's last log"},
           {t:"col",id:"ration",name:"Emergency Ration Cache",kind:"food",icon:"🥫",consumable:true,effects:{health:20,hydration:15},grab:"You crack the drone's ration cache. Actual edible food and a sealed canteen. (+20 health, +15 hydration)"}]},
@@ -289,16 +293,20 @@ const SPECIAL = {
 
 /* Natural barriers (rivers, mountains, thicket) — undirected, by coord-key */
 const BLOCKED = [
+  {a:"3,1.5",b:"2,1",type:"river"}, {a:"3,1.5",b:"2,2",type:"river"},
+  {a:"3,2.5",b:"2,2",type:"river"}, {a:"3,2.5",b:"2,3",type:"river"}, {a:"4,1",b:"4,0",type:"river"},
   {a:"-1,-1.5",b:"-2,-1",type:"mountains"}, {a:"-1,-1.5",b:"-2,-2",type:"mountains"}, {a:"-1,-2.5",b:"-2,-2",type:"mountains"},
   {a:"1,2.5",b:"0,2",type:"thicket"}, {a:"1,2.5",b:"0,3",type:"thicket"},
-]; // lake water barriers are implicit: barrierKind() returns "water" for any neighbor with terrain==="lake"
+];
 
 /* Man-made buildings: a building is a set of hex IDs plus an explicit list
    of entrances ({hex, dir}). Every OTHER edge from a building hex to a
    non-building hex is automatically sealed as a 'wall' barrier. Future
    buildings just declare their own hex set + however many entrances they
    should have — the sealing logic below is generic. */
-const BUILDINGS = []; // GENBUILDING uses sub-map system; add future multi-hex overworld buildings here
+const BUILDINGS = [
+  { hexes:["BUILD_GEN","BUILD_BREAK"], entrances:[{hex:"BUILD_GEN", dir:"SW"}] }
+];
 
 
 /* ==========================================================
@@ -375,7 +383,6 @@ function initWorld(){
   buildLattice();
   applyBlockedEdges();
   applyBuildingWalls();
-  initBuildings();
 }
 
 
@@ -384,7 +391,7 @@ function initWorld(){
    ========================================================== */
 function freshState(){
   return {
-    cur:"FURROW", turn:0, mode:"play", submap:null,
+    cur:"FURROW", turn:0, mode:"play",
     decoded:false, power:false, hasRaft:false,
     shift:0, combo:"", choice:null,
     warned:0, over:false,
@@ -399,15 +406,11 @@ let S = freshState();
    SECTION: HELPERS  (pure, no rendering)
    ========================================================== */
 const $ = id => document.getElementById(id);
-
-function activeHexes(){ return S.submap ? BLDG[S.submap].hexes   : HEXES; }
-function activeC2I()  { return S.submap ? BLDG[S.submap].coord2id : COORD2ID; }
-function activeBmap() { return S.submap ? BLDG[S.submap].bmap     : BMAP; }
-function H(id){ return activeHexes()[id]; }
+const H = id => HEXES[id];
 
 function posKey(id){ const p = H(id).pos; return p.x + "," + p.y; }
-function neighbor(id, dir){ const p = H(id).pos, d = DIRS[dir]; return activeC2I()[(p.x+d[0]) + "," + (p.y+d[1])] || null; }
-function edgeType(a, b){ return activeBmap()[[posKey(a), posKey(b)].sort().join("|")] || null; }
+function neighbor(id, dir){ const p = H(id).pos, d = DIRS[dir]; return COORD2ID[(p.x+d[0]) + "," + (p.y+d[1])] || null; }
+function edgeType(a, b){ return BMAP[[posKey(a), posKey(b)].sort().join("|")] || null; }
 
 function barrierKind(id, dir){
   const n = neighbor(id, dir);
@@ -556,7 +559,7 @@ function waterBand(id, d){
 }
 
 function renderMap(){
-  const disc = Object.keys(activeHexes()).filter(k => H(k).disc);
+  const disc = Object.keys(HEXES).filter(k => H(k).disc);
   const cs = disc.map(center);
   let minx = Math.min(...cs.map(c=>c.x)), maxx = Math.max(...cs.map(c=>c.x));
   let miny = Math.min(...cs.map(c=>c.y)), maxy = Math.max(...cs.map(c=>c.y));
@@ -635,14 +638,9 @@ function renderMap(){
   g += halo + parch + bands + glyphs + trails + art + meds + labels + marker;
   g += `<rect x="${minx}" y="${miny}" width="${W}" height="${Ht}" filter="url(#rough)"/>`;
   g += `<rect x="${(minx+5).toFixed(1)}" y="${(miny+5).toFixed(1)}" width="${(W-10).toFixed(1)}" height="${(Ht-10).toFixed(1)}" fill="none" stroke="${INK}" stroke-width="2.5" rx="3"/>`;
-  if (!S.submap){
-    const cxr = maxx-30, cyr = miny+32, s = 14;
-    g += `<circle cx="${cxr.toFixed(1)}" cy="${cyr.toFixed(1)}" r="${s+4}" fill="#efe0bb" stroke="${INK}" stroke-width="1.2"/><path d="M${cxr.toFixed(1)} ${(cyr-s).toFixed(1)} L${(cxr+s*0.24).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr+s).toFixed(1)} L${(cxr-s*0.24).toFixed(1)} ${cyr.toFixed(1)} Z" fill="${INK}"/><path d="M${(cxr-s).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr-s*0.24).toFixed(1)} L${(cxr+s).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr+s*0.24).toFixed(1)} Z" fill="${INK2}"/><text x="${cxr.toFixed(1)}" y="${(cyr-s-3).toFixed(1)}" text-anchor="middle" font-size="9" fill="${INK}">N</text>`;
-    g += `<text x="${(minx+16).toFixed(1)}" y="${(miny+24).toFixed(1)}" font-size="12" fill="${INK}" font-style="italic">~ Field Chart ~</text>`;
-  } else {
-    const bldgName = HEXES[S.submap] ? HEXES[S.submap].name : S.submap;
-    g += `<text x="${(minx+16).toFixed(1)}" y="${(miny+24).toFixed(1)}" font-size="12" fill="${INK}" font-style="italic">⌂ Interior: ${bldgName}</text>`;
-  }
+  const cxr = maxx-30, cyr = miny+32, s = 14;
+  g += `<circle cx="${cxr.toFixed(1)}" cy="${cyr.toFixed(1)}" r="${s+4}" fill="#efe0bb" stroke="${INK}" stroke-width="1.2"/><path d="M${cxr.toFixed(1)} ${(cyr-s).toFixed(1)} L${(cxr+s*0.24).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr+s).toFixed(1)} L${(cxr-s*0.24).toFixed(1)} ${cyr.toFixed(1)} Z" fill="${INK}"/><path d="M${(cxr-s).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr-s*0.24).toFixed(1)} L${(cxr+s).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr+s*0.24).toFixed(1)} Z" fill="${INK2}"/><text x="${cxr.toFixed(1)}" y="${(cyr-s-3).toFixed(1)}" text-anchor="middle" font-size="9" fill="${INK}">N</text>`;
+  g += `<text x="${(minx+16).toFixed(1)}" y="${(miny+24).toFixed(1)}" font-size="12" fill="${INK}" font-style="italic">~ Field Chart ~</text>`;
   g += `</svg>`;
   $("map").innerHTML = g;
 }
@@ -702,9 +700,6 @@ function renderStatus(){
    ========================================================== */
 function buildActions(){
   const h = H(S.cur), acts = [];
-  if (S.submap && S.cur === BLDG[S.submap].entryHex){
-    acts.push({ label:"Exit the building", fn: exitBuilding });
-  }
   h.comps.forEach(c => {
     if (c.t==="col" && !c.taken && !c.hidden){
       const verb = c.consumable ? (c.kind==="water" ? "Drink the " : "Eat the ") : "Take the ";
@@ -722,7 +717,7 @@ function buildActions(){
     }
   });
   if (!S.hasRaft && nextToWater(S.cur) && RAFT_MAT.every(has)){
-    acts.push({ label:"Lash the driftwood, vines & Dopehtesu pods into a raft", fn: buildRaft });
+    acts.push({ label:"Lash the driftwood, vines & foam into a raft", fn: buildRaft });
   }
   return acts;
 }
@@ -868,24 +863,8 @@ function swimDeath(w){
 function buildRaft(){
   S.hasRaft = true;
   S.inv = S.inv.filter(i => !RAFT_MAT.includes(i.id));
-  log("You lash the driftwood with the vines and strap the Dopehtesu pods underneath. The waxy pods hold magnificently. It is, generously, a raft. It floats. Impressively.", "good");
+  log("You lash the driftwood together with the vines and strap the foam underneath. It is, generously, a raft. It floats. Mostly.", "good");
   log("Now you can cross the water — pick a 🌊 direction and paddle.", "nav");
-  refresh();
-}
-
-function enterBuilding(buildingId){
-  S.submap = buildingId;
-  S.cur = BLDG[buildingId].entryHex;
-  H(S.cur).disc = true;
-  log("You push through the door. " + H(S.cur).desc, "you");
-  refresh();
-}
-
-function exitBuilding(){
-  const overhex = S.submap;
-  S.submap = null;
-  S.cur = overhex;
-  log("You step back outside into the open air.", "you");
   refresh();
 }
 
@@ -918,16 +897,13 @@ function doManipulable(c){
     case "power":
       openPowerChoice();
       return;
-    case "genbuilding_enter":
-      enterBuilding(S.cur);
-      return;
     case "vendor":
       if (!S.power){
         log("You jab the buttons. Nothing. The machine's dark and dead — no power. There must be a generator somewhere in this building.", "dim");
         return;
       }
       c.done = true;
-      { const kc = comp("GEN_BREAK","green_keycard"); if (kc) kc.hidden = false; }
+      { const kc = comp("BUILD_BREAK","green_keycard"); if (kc) kc.hidden = false; }
       log("Powered up, the machine wheezes to life, blinks a cheerful 8-bit smile, and drops something into the tray with a CLUNK: a GREEN KEYCARD. (Grab it.)", "good");
       break;
     case "hatch":
@@ -975,7 +951,7 @@ function openPowerChoice(){
 }
 function powerOn(){
   S.power = true; S.mode = "play"; S.choice = null;
-  const m = comp("GEN_ROOM","power"); if (m) m.done = true;
+  const m = comp("BUILD_GEN","power"); if (m) m.done = true;
   log("You throw the green breaker. The generator coughs, catches, and the building shudders awake — lights buzz on, and somewhere next door a vending machine hums to life.", "good");
   refresh();
 }
@@ -989,7 +965,7 @@ function electrocute(){
 /* ==========================================================
    SECTION: PUZZLES — decoder ring
    ========================================================== */
-const PLAINTEXT = "THE WISE EXPLORER DOES NOT DROWN TRYING TO SWIM. INSTEAD, THEY USE THE POD.";
+const PLAINTEXT = "BRING THE COOLANT CELL, THE FLUX COIL, AND THE GREEN KEYCARD.";
 function shiftStr(s, k){ return s.replace(/[A-Z]/g, ch => String.fromCharCode((ch.charCodeAt(0)-65+k+26)%26+65)); }
 const CIPHERTEXT = shiftStr(PLAINTEXT, CIPHER_SHIFT);
 
@@ -1010,7 +986,7 @@ function confirmDecode(){
     const m = comp("OBELISK","obelisk"); if (m) m.done = true;
     S.mode = "play";
     log("The glyphs snap into focus:\n\"" + PLAINTEXT + "\"", "good");
-    log("The pod. Something buoyant grows in these alien wilds — find it, build a raft, cross the water. The transport is out there.", "nav");
+    log("Coolant Cell, Flux Coil, Green Keycard. Find all three, haul them to the transport, and let's go home.", "nav");
     refresh();
   } else {
     log("You confirm... gibberish. The glyphs remain smug. Keep turning.", "bad");
@@ -1054,31 +1030,27 @@ function unlockLocker(intro){
    ========================================================== */
 function navComp(){
   if (!S.decoded){
-    log("Find that black obelisk and decode it — the ring fancies the number seven. The message will point you toward the water.", "nav");
-    return;
-  }
-  if (!has("repair_manual")){
-    log("The obelisk hinted at the pod — something buoyant that grows out here. Build a raft and cross the water. The ship repair manual you'll need is somewhere out on the lake.", "nav");
+    log("Find that black obelisk and decode it — the ring fancies the number seven. Then we'll know what the ship needs.", "nav");
     return;
   }
   const miss = REQUIRED.filter(id => !has(id));
-  const N = { coolant_cell:"Coolant Cell", flux_coil:"Flux Coil", green_keycard:"Green Keycard", repair_manual:"Ship Repair Manual" };
+  const N = { coolant_cell:"Coolant Cell", flux_coil:"Flux Coil", green_keycard:"Green Keycard" };
   if (miss.length){
-    log("You still need: " + miss.map(m=>N[m]||m).join(", ") + ". The keycard's in that vending machine — but it needs power first (mind the red wire). Then haul everything to the transport.", "nav");
+    log("You still need: " + miss.map(m=>N[m]).join(", ") + ". The keycard's in that vending machine — but it needs power first (mind the red wire). Then haul everything to the transport.", "nav");
   } else {
-    log("You've got all the parts and the manual. Get to the TRANSPORT and launch.", "nav");
+    log("You've got all three parts. Get them to the TRANSPORT and launch.", "nav");
   }
-  if (!S.hasRaft) log("To cross the water: find driftwood, vines, and Dopehtesu pods — those huge waxy things — then lash a raft at the shore.", "nav");
+  if (!S.hasRaft) log("If you fancy what's across the water: that's a death-swim. Find driftwood, vines, and something that floats, then lash a raft at the shore.", "nav");
 }
 
 function attemptEscape(){
-  if (!has("repair_manual")){ log("You poke at the transport's controls. Nothing makes sense without the repair manual. Find it — it's out on the water somewhere.", "bad"); return; }
+  if (!S.decoded){ log("You poke at the transport's controls and realize you've no idea what it needs. Decode the obelisk first.", "bad"); return; }
   const miss = REQUIRED.filter(id => !has(id));
   if (miss.length){ log("The transport's still missing parts. Can't hot-wire a starship with vibes. Go finish scavenging.", "bad"); return; }
   S.over = true;
-  log("You slot the COOLANT CELL, FLUX COIL, and GREEN KEYCARD into their housings — the manual open on your knee. The engine coughs, catches, ROARS, and you punch up through the canopy as the impending doom screeches in the distance.", "good");
+  log("You slam the COOLANT CELL, FLUX COIL, and GREEN KEYCARD into place. The engine coughs, catches, ROARS, and you punch up through the canopy as the impending doom screeches in the distance.", "good");
   log("Took you long enough.", "nav");
-  log("\n★ YOU ESCAPED. ★\n— END OF ITERATION 7 —", "good");
+  log("\n★ YOU ESCAPED. ★\n— END OF ITERATION 5 —", "good");
   refresh();
 }
 
@@ -1245,99 +1217,5 @@ function restart(){
 }
 
 playIntro();
-
-
-/* ==========================================================
-   SECTION: BUILDING MAPS
-   Interior sub-map definitions and runtime state.
-
-   Each BUILDING_DEF describes an interior as a mini hex-grid,
-   using the same (x, y) hex-offset coordinate system as the
-   overworld. Rooms are placed in a tight cluster so the map
-   renderer can draw them at the normal scale.
-
-   At runtime, initBuildings() deep-clones each def into BLDG,
-   producing independent hexes/coord2id/bmap objects per building.
-   S.submap = building overworld ID (e.g. "GENBUILDING") while inside.
-   ========================================================== */
-
-/* ── BUILDING_DEFS ──────────────────────────────────────────
-   Each entry keyed by the overworld hex ID it belongs to.
-   rooms[] — room objects (become hex entries in BLDG[id].hexes)
-   links[] — undirected passages between rooms {a:"roomId", b:"roomId"}
-   entryRoom — which room id is the entry/exit point
-*/
-const BUILDING_DEFS = {
-  "GENBUILDING": {
-    entryRoom: "GEN_ROOM",
-    rooms: [
-      {
-        id: "GEN_ROOM",
-        name: "Generator Room",
-        terrain: "indoor",
-        env: "indoor",
-        light: "dark",
-        desc: "Bare cinderblock. A diesel generator squats in the corner, cables snaking to a breaker panel on the wall. Emergency lighting gives everything a greenish tinge.",
-        comps: [
-          { t:"man", id:"power", name:"Breaker Panel", icon:"⚡", verb:"Examine the breaker panel" }
-        ],
-        pos: { x: 0, y: 0 }
-      },
-      {
-        id: "GEN_BREAK",
-        name: "Break Room",
-        terrain: "indoor",
-        env: "indoor",
-        light: "dark",
-        desc: "A dusty break room: folding chair, overflowing ashtray, and a vending machine plastered with cheerful stickers. It's unpowered and very, very smug about it.",
-        comps: [
-          { t:"man", id:"vendor", name:"Vending Machine", icon:"🎰", verb:"Use the vending machine" },
-          { t:"col", id:"green_keycard", name:"Green Keycard", kind:"part", icon:"💚", required:true, hidden:true,
-            grab:"You retrieve the GREEN KEYCARD from the vending tray. (repair part)" }
-        ],
-        pos: { x: 1, y: -0.5 }
-      }
-    ],
-    /* direct passage between these two rooms */
-    links: [
-      { a: "GEN_ROOM", b: "GEN_BREAK" }
-    ]
-  }
-};
-
-/* ── BLDG — runtime state (reset by initBuildings on every world init) ── */
-let BLDG = {};
-
-function initBuildings(){
-  BLDG = {};
-  for (const [overId, def] of Object.entries(BUILDING_DEFS)){
-    const hexes    = {};
-    const coord2id = {};
-    const bmap     = {};
-
-    /* Deep-clone all rooms so restart always gets pristine comps */
-    const rooms = JSON.parse(JSON.stringify(def.rooms));
-    for (const r of rooms){
-      r.disc = false;
-      hexes[r.id]    = r;
-      coord2id[r.pos.x + "," + r.pos.y] = r.id;
-    }
-
-    /* Open passages between linked rooms (no barrier = open passage) */
-    /* Wall every other edge between interior rooms and the void.
-       For building sub-maps, "void" is any grid position that has no room.
-       We don't need to physically add walls in bmap — the neighbor()
-       function returns null for coords with no entry in coord2id,
-       and move() treats null neighbors as "No way through" already.
-       Links are simply the absence of a wall: open by default.       */
-
-    BLDG[overId] = {
-      hexes,
-      coord2id,
-      bmap,
-      entryHex: def.entryRoom
-    };
-  }
-}
 
 </script>

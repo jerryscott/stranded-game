@@ -26,13 +26,16 @@ function doManipulable(c){
     case "power":
       openPowerChoice();
       return;
+    case "genbuilding_enter":
+      enterBuilding(S.cur);
+      return;
     case "vendor":
       if (!S.power){
         log("You jab the buttons. Nothing. The machine's dark and dead — no power. There must be a generator somewhere in this building.", "dim");
         return;
       }
       c.done = true;
-      { const kc = comp("BUILD_BREAK","green_keycard"); if (kc) kc.hidden = false; }
+      { const kc = comp("GEN_BREAK","green_keycard"); if (kc) kc.hidden = false; }
       log("Powered up, the machine wheezes to life, blinks a cheerful 8-bit smile, and drops something into the tray with a CLUNK: a GREEN KEYCARD. (Grab it.)", "good");
       break;
     case "hatch":

@@ -86,7 +86,23 @@ function swimDeath(w){
 function buildRaft(){
   S.hasRaft = true;
   S.inv = S.inv.filter(i => !RAFT_MAT.includes(i.id));
-  log("You lash the driftwood together with the vines and strap the foam underneath. It is, generously, a raft. It floats. Mostly.", "good");
+  log("You lash the driftwood with the vines and strap the Dopehtesu pods underneath. The waxy pods hold magnificently. It is, generously, a raft. It floats. Impressively.", "good");
   log("Now you can cross the water — pick a 🌊 direction and paddle.", "nav");
+  refresh();
+}
+
+function enterBuilding(buildingId){
+  S.submap = buildingId;
+  S.cur = BLDG[buildingId].entryHex;
+  H(S.cur).disc = true;
+  log("You push through the door. " + H(S.cur).desc, "you");
+  refresh();
+}
+
+function exitBuilding(){
+  const overhex = S.submap;
+  S.submap = null;
+  S.cur = overhex;
+  log("You step back outside into the open air.", "you");
   refresh();
 }
