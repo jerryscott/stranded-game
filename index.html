@@ -1,0 +1,1193 @@
+<!--
+==================================================================
+  STRANDED! — early-'80s sci-fi dramedy.
+  ITERATION 5 — INTRO CUTSCENE + LAYOUT PASS
+==================================================================
+  CHANGE THIS PASS
+   - New intro cutscene (plays once, on first load only — NOT replayed
+     by restart()): a small hand-drawn SVG cartoon of the pod crashing
+     (stars, moon, alien treeline reusing the map's pine() doodle,
+     ship tumbling in with smoke + a burst + screen-shake), fading into
+     a story panel with the opening log entry + a "how to play" key
+     diagram + a Begin button. Click-to-skip available throughout.
+   - Location/terrain/env/light badges card moved out of the right
+     column and placed under the status strip in the (now two-card)
+     middle column, at the same narrow width.
+   - Directional movement PAD removed from the live Controls card.
+     Movement is keyboard-only now (Q W E / A S D); the existing hint
+     line at the bottom of Controls still documents this. Action
+     buttons (1-9) and the Hint button are unaffected.
+==================================================================
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{ --bg:#0a0a18; --panel:#12122a; --panel2:#181838; --neon-cyan:#22e0ff; --neon-mag:#ff3df0; --neon-lime:#9dff3d; --neon-amber:#ffb13d; --neon-purple:#a96bff; --text:#d8f0ff; --dim:#7d86b8; --line:#2a2a55; }
+  *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Courier New",ui-monospace,monospace;}
+  body{padding:14px;min-height:100vh;background-image:radial-gradient(circle at 20% 0%,#1a0a3a 0,transparent 45%),radial-gradient(circle at 90% 100%,#0a2a3a 0,transparent 50%);}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;background:repeating-linear-gradient(transparent 0 2px,rgba(0,0,0,.18) 2px 4px);mix-blend-mode:multiply;opacity:.6;}
+  h1{font-family:"Arial Black",Impact,sans-serif;font-style:italic;letter-spacing:1px;margin:0 0 2px;font-size:30px;color:#fff;text-shadow:0 0 6px var(--neon-mag),0 0 14px var(--neon-mag),3px 3px 0 var(--neon-purple);}
+  .tag{color:var(--neon-cyan);font-size:12px;letter-spacing:3px;margin-bottom:12px;text-transform:uppercase;text-shadow:0 0 6px var(--neon-cyan);}
+
+  /* ---------- intro cutscene ---------- */
+  #introOverlay{max-width:560px;margin:0 auto;}
+  .cutsceneStage{position:relative;border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 0 0 2px var(--line),0 8px 30px rgba(0,0,0,.5);
+    animation:stageShake 3.6s ease, stageFadeOut 3.6s ease forwards;}
+  .cutsceneStage svg{display:block;width:100%;height:auto;}
+  .skipBtn{position:absolute;top:8px;right:8px;background:rgba(10,10,24,.7);color:var(--dim);border:1px solid var(--line);border-radius:6px;padding:4px 9px;font-size:10px;cursor:pointer;font-family:inherit;}
+  .skipBtn:hover{color:var(--neon-cyan);border-color:var(--neon-cyan);}
+  .twinkle{animation:twinkle 2.4s ease-in-out infinite;}
+  .shipfly{animation:shipFly 3.6s ease-in forwards;}
+  .flame{animation:flameFlicker .35s steps(2) infinite;}
+  .smokepuff{animation:smokePuff 1.1s ease-out forwards;opacity:0;}
+  .boom{animation:boomPop 3.6s ease forwards;opacity:0;transform-origin:center;}
+  @keyframes twinkle{0%,100%{opacity:.9;}50%{opacity:.25;}}
+  @keyframes flameFlicker{0%,100%{opacity:1;}50%{opacity:.45;}}
+  @keyframes smokePuff{0%{opacity:0;transform:scale(.4);}20%{opacity:.65;}70%{opacity:.4;transform:scale(1.5) translate(-6px,6px);}100%{opacity:0;transform:scale(1.9) translate(-12px,12px);}}
+  @keyframes shipFly{
+    0%{transform:translate(18px,6px) rotate(-6deg) scale(.92);opacity:1;}
+    30%{transform:translate(68px,44px) rotate(2deg) scale(.96);opacity:1;}
+    55%{transform:translate(120px,84px) rotate(10deg) scale(1);opacity:1;}
+    70%{transform:translate(160px,104px) rotate(18deg) scale(1.02);opacity:1;}
+    73%{transform:translate(168px,108px) rotate(20deg) scale(1.02);opacity:1;}
+    75%{opacity:0;} 100%{opacity:0;}
+  }
+  @keyframes boomPop{0%,71%{opacity:0;transform:scale(.2);}76%{opacity:1;transform:scale(1.15);}86%{opacity:1;transform:scale(1);}100%{opacity:0;transform:scale(1.3);}}
+  @keyframes stageShake{0%,70%{transform:translate(0,0);}73%{transform:translate(-6px,3px);}76%{transform:translate(5px,-4px);}79%{transform:translate(-4px,2px);}82%{transform:translate(3px,-2px);}85%,100%{transform:translate(0,0);}}
+  @keyframes stageFadeOut{0%,88%{opacity:1;}100%{opacity:0;}}
+
+  .storyPanel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-top:12px;box-shadow:0 6px 24px rgba(0,0,0,.4);}
+  .storyPanel h2{margin:0 0 10px;font-family:"Arial Black",Impact,sans-serif;font-style:italic;color:#fff;text-shadow:0 0 6px var(--neon-mag);font-size:20px;}
+  .storyText p{font-size:13px;line-height:1.6;margin:0 0 10px;color:var(--text);}
+  .howto{border-top:1px dashed var(--line);margin-top:12px;padding-top:12px;}
+  .howto h3{margin:0 0 10px;font-size:12px;letter-spacing:2px;color:var(--neon-cyan);text-transform:uppercase;}
+  .keyrow{display:flex;justify-content:center;gap:10px;margin-bottom:6px;}
+  .keytrio{display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .keytrio kbd{background:#000;border:1px solid var(--line);border-radius:6px;padding:4px 9px;font-size:13px;color:var(--neon-amber);font-family:inherit;}
+  .keytrio span{font-size:9px;color:var(--dim);}
+  .howto p{font-size:12px;color:var(--dim);line-height:1.6;margin:6px 0;}
+  .howto kbd{background:#000;border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:11px;color:var(--neon-amber);}
+  .beginBtn{width:100%;margin-top:14px;padding:12px;font-size:14px;}
+
+  /* ---------- main game layout ---------- */
+  .wrap{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;}
+  .col-left{flex:1 1 360px;min-width:300px;max-width:480px;}
+  .col-mid{flex:0 0 190px;max-width:210px;display:flex;flex-direction:column;gap:12px;}
+  .col-right{flex:2 1 360px;min-width:260px;display:flex;flex-direction:column;gap:12px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;box-shadow:0 0 0 1px #000 inset,0 6px 24px rgba(0,0,0,.4);}
+  .card h2{margin:0 0 8px;font-size:12px;letter-spacing:2px;color:var(--neon-cyan);text-transform:uppercase;border-bottom:1px dashed var(--line);padding-bottom:6px;}
+  #map{border-radius:8px;overflow:hidden;box-shadow:0 0 0 2px #3a2a16,0 0 18px rgba(0,0,0,.5) inset;} svg{display:block;width:100%;height:auto;background:#221809;}
+  #log{height:200px;overflow-y:auto;font-size:14px;line-height:1.5;background:#060612;border:1px solid var(--line);border-radius:8px;padding:10px;} #log p{margin:0 0 9px;white-space:pre-wrap;}
+  .sys{color:var(--neon-lime);} .nav{color:var(--neon-cyan);} .nav::before{content:"◈ NAV-COMP: ";color:var(--dim);font-size:11px;}
+  .ev{color:var(--neon-amber);} .bad{color:#ff5b6e;} .good{color:var(--neon-lime);font-weight:bold;} .you{color:var(--text);}
+  .loc{color:var(--neon-mag);font-weight:bold;text-shadow:0 0 6px var(--neon-mag);} .badge{font-size:11px;border:1px solid var(--line);border-radius:20px;padding:2px 9px;color:var(--dim);}
+  .locLine{font-size:12px;margin-bottom:8px;} .badgeRow{display:flex;flex-wrap:wrap;gap:5px;}
+
+  /* status strip: Doom (full height) + six meters (two half-height rows) */
+  .statuscard{padding:10px 8px;}
+  .statuscol{display:flex;gap:8px;height:300px;}
+  .doomcol{display:flex;flex-direction:column;align-items:center;gap:6px;width:34px;}
+  .doomtrack{flex:1 1 auto;width:100%;height:100%;background:#060612;border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;}
+  .doomfill{width:100%;height:0%;transition:height .25s;background:linear-gradient(180deg,#ff3b53,var(--neon-amber),var(--neon-lime));}
+  .doomlabel{font-size:9px;text-align:center;color:var(--dim);line-height:1.25;}
+  .doomlabel b{display:block;font-size:12px;color:var(--text);}
+
+  .vgrid{flex:1 1 auto;height:100%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:6px;}
+  .vmeter{display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .vtrack{flex:1 1 auto;width:20px;background:#060612;border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;position:relative;}
+  .vfill{width:100%;transition:height .25s;}
+  .vfill.hp{background:linear-gradient(180deg,#ff8b6e,#ff3b53);}
+  .vfill.hyd{background:linear-gradient(180deg,#36c5ff,#1f7fff);}
+  .vfill.grey{background:#33384a;height:35%!important;}
+  .vmeter.disabled .vtrack{opacity:.45;}
+  .vlabel{font-size:9px;letter-spacing:.4px;color:var(--dim);text-align:center;line-height:1.25;}
+  .vlabel b{display:block;font-size:12px;color:var(--text);}
+  .vmeter.disabled .vlabel b{color:var(--dim);}
+  .soon{display:block;font-size:7.5px;opacity:.7;}
+
+  .inv{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;} .item{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:3px 8px;background:var(--panel2);}
+  .item.part{border-color:var(--neon-lime);color:var(--neon-lime);box-shadow:0 0 6px rgba(157,255,61,.4);} .item.mat{border-color:var(--neon-amber);color:var(--neon-amber);}
+  .item.tool{border-color:#8fa6ff;color:#8fa6ff;}
+  .empty{color:var(--dim);font-size:12px;font-style:italic;}
+  button.k{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 6px;cursor:pointer;font-size:12px;transition:.12s;font-family:inherit;}
+  button.k:hover:not(:disabled){border-color:var(--neon-cyan);color:var(--neon-cyan);box-shadow:0 0 8px rgba(34,224,255,.35);}
+  button.k:disabled{opacity:.3;cursor:default;}
+  .acts{display:flex;flex-direction:column;gap:6px;} .acts button{text-align:left;display:flex;gap:8px;align-items:center;}
+  .acts button .num{display:inline-flex;justify-content:center;align-items:center;width:22px;height:22px;border-radius:5px;background:#000;color:var(--neon-amber);border:1px solid var(--line);font-weight:bold;flex:0 0 auto;}
+  .hint{color:var(--dim);font-size:11px;margin-top:8px;line-height:1.5;}
+  .overlay{background:#060612;border:1px solid var(--neon-purple);border-radius:8px;padding:12px;box-shadow:0 0 14px rgba(169,107,255,.4);}
+  .overlay .big{font-size:15px;letter-spacing:1px;color:var(--neon-lime);white-space:pre-wrap;min-height:46px;background:#000;border:1px dashed var(--line);border-radius:6px;padding:8px;margin:8px 0;}
+  .overlay .prompt{font-size:13px;color:var(--text);margin-bottom:10px;line-height:1.5;}
+  .overlay .ringrow{display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0;} .ringval{font-size:22px;color:var(--neon-amber);min-width:42px;text-align:center;}
+  .ov-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  .comboDisplay{font-size:26px;letter-spacing:8px;text-align:center;color:var(--neon-cyan);background:#000;border:1px dashed var(--line);border-radius:6px;padding:10px;margin:8px 0;min-height:24px;}
+  .legend{font-size:10px;color:var(--dim);margin-top:8px;line-height:1.6;}
+  .restartBtn{width:100%;margin-top:10px;}
+  @media(max-width:680px){#log{height:170px} .statuscol{height:220px;} .col-mid{flex:1 1 100%;max-width:100%;}}
+</style>
+
+<h1>STRANDED!</h1>
+<div class="tag">a nostalgic sci-fi dramedy &nbsp;•&nbsp; iteration 5 &nbsp;•&nbsp; 61 hexes</div>
+
+<div id="introOverlay">
+  <div class="cutsceneStage" id="cutsceneStage" onclick="skipIntro()">
+    <button class="skipBtn" onclick="skipIntro()">Skip ▶</button>
+  </div>
+  <div class="storyPanel" id="storyPanel" style="display:none;">
+    <h2>EMERGENCY POD LOG — ENTRY 1</h2>
+    <div class="storyText" id="storyText"></div>
+    <div class="howto">
+      <h3>How to Play</h3>
+      <div class="keyrow">
+        <div class="keytrio"><kbd>Q</kbd><span>NW</span></div>
+        <div class="keytrio"><kbd>W</kbd><span>N</span></div>
+        <div class="keytrio"><kbd>E</kbd><span>NE</span></div>
+      </div>
+      <div class="keyrow">
+        <div class="keytrio"><kbd>A</kbd><span>SW</span></div>
+        <div class="keytrio"><kbd>S</kbd><span>S</span></div>
+        <div class="keytrio"><kbd>D</kbd><span>SE</span></div>
+      </div>
+      <p>Those six keys move you one hex at a time — laid out to match the directions above.</p>
+      <p>Press <kbd>1</kbd>–<kbd>9</kbd> for whatever's available at your current location (take items, try locks, pull levers...).</p>
+      <p>Press <kbd>H</kbd> any time to ask the Nav-Comp for a hint.</p>
+    </div>
+    <button class="k beginBtn" onclick="beginGame()">▶ Begin Transmission</button>
+  </div>
+</div>
+
+<div id="gameWrap" style="display:none;">
+  <div class="wrap">
+    <div class="col-left"><div class="card"><h2>Field Chart</h2><div id="map"></div><div class="legend" id="legend"></div></div></div>
+
+    <div class="col-mid">
+      <div class="card statuscard">
+        <h2>Status</h2>
+        <div class="statuscol">
+          <div class="doomcol">
+            <div class="doomtrack"><div class="doomfill" id="doomBar"></div></div>
+            <div class="doomlabel"><b id="doomTxt">0%</b>DOOM</div>
+          </div>
+          <div class="vgrid" id="vgrid"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="locLine">Location: <span class="loc" id="locName">—</span></div>
+        <div class="badgeRow">
+          <span class="badge" id="terrBadge">—</span>
+          <span class="badge" id="envBadge">—</span>
+          <span class="badge" id="lightBadge">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="card"><h2>Transmission Log</h2><div id="log"></div></div>
+      <div class="card">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:6px;">INVENTORY</div>
+        <div class="inv" id="inv"></div>
+      </div>
+      <div class="card"><h2>Controls</h2><div id="controlArea"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   SECTION: TUNING
+   ========================================================== */
+const DOOM_LIMIT = 150, DOOM_WARN = [0.5, 0.75, 0.9];
+// Issue #3 (accepted, not fixed): these are plaintext constants, readable
+// via devtools/view-source. Any client-only obfuscation here is theater
+// against a determined player — not worth the complexity in a single-file
+// browser game. Documented limitation.
+const CIPHER_SHIFT = 7, LOCKER_CODE = "42";
+const DEHYDRATION_DMG = 10, LOW_WARN = 25;
+const REQUIRED = ["coolant_cell", "flux_coil", "green_keycard"];
+const RAFT_MAT = ["driftwood", "vines", "floatfoam"];
+
+/* ==========================================================
+   SECTION: DATA  (terrain, directions, map content)
+   ========================================================== */
+const TERRAIN = {
+  clearing:{label:"clearing",hyd:3}, forest:{label:"forest",hyd:4}, dense:{label:"thicket",hyd:6},
+  water:{label:"spring",hyd:3}, lake:{label:"lake",hyd:3}, ruin:{label:"ruins",hyd:4}, indoor:{label:"shelter",hyd:2}
+};
+const DIRS = { N:[0,-1], S:[0,1], NE:[1,-0.5], SE:[1,0.5], NW:[-1,-0.5], SW:[-1,0.5] };
+const KEYDIR = { q:"NW", w:"N", e:"NE", a:"SW", s:"S", d:"SE", arrowup:"N", arrowdown:"S" };
+const DORD = ["NW","N","NE","SE","S","SW"];
+const DWORD = { N:"north", S:"south", NE:"northeast", SE:"southeast", NW:"northwest", SW:"southwest" };
+
+const berries = () => ({ t:"col", id:"berries", name:"Wild Glow-Berries", kind:"food", icon:"🫐", consumable:true,
+  effects:{health:6}, grab:"You risk a handful of glow-berries. Tart, faintly electric, non-lethal. (+6 health)" });
+const puddle = () => ({ t:"col", id:"puddle", name:"Rain Puddle", kind:"water", icon:"💧", consumable:true,
+  effects:{hydration:12,health:-2}, grab:"You sip from a clean-ish puddle. Beggars, choosers, etc. (+12 hydration, -2 health)" });
+
+/* SPECIAL hexes, keyed by "c,y". Cloned fresh on every world build (see
+   buildLattice) so restart() always starts from pristine flags. */
+const SPECIAL = {
+ "0,0":{id:"FURROW",name:"Crash Furrow",terrain:"clearing",env:"outdoor",light:"lit",
+   desc:"Smoke still curls from the furrow your pod plowed into the loam. A rare patch of open sky. The Nav-Comp blinks from a Frisbee-sized hole in its casing.",
+   comps:[{t:"col",id:"sandwich",name:"Half-Eaten Sandwich",kind:"food",icon:"🥪",consumable:true,effects:{health:10},grab:"You wolf the sandwich. Quantum Ham on Rye — best before the Carter administration. (+10 health)"}]},
+ "0,-1":{id:"OBELISK",name:"Mossy Obelisk",terrain:"ruin",env:"outdoor",light:"dark",
+   desc:"A slab of black stone etched with spiralling alien glyphs.",
+   comps:[{t:"man",id:"obelisk",name:"Alien Inscription",icon:"🗿",verb:"Decode the inscription"}]},
+ "0,-4":{id:"TRANSPORT",name:"The Transport",terrain:"clearing",env:"outdoor",light:"lit",
+   desc:"Your actual ride out: a battered shuttle slumped between two trees, ugly and beautiful. It needs parts and a clue before it'll fly.",
+   comps:[{t:"man",id:"transport",name:"The Wrecked Transport",icon:"🚀",verb:"Install the parts and launch"}]},
+ "-1,-0.5":{id:"SPRING",name:"The Spring",terrain:"water",env:"outdoor",light:"lit",
+   desc:"A clear spring burbles over smooth stones in a shaft of sun. One stone is suspiciously, comically heavy.",
+   comps:[{t:"col",id:"spring_water",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,effects:{hydration:45,health:5},grab:"You drink deep. Cold, clean, faintly minty. (+45 hydration, +5 health)"},
+          {t:"col",id:"rock",name:"Suspiciously Heavy Rock",kind:"tool",icon:"🪨",grab:"You pocket the suspiciously heavy rock. It has the air of an object with One Job."}]},
+ "1,-1.5":{id:"BUILD_GEN",name:"Generator Room",terrain:"indoor",env:"indoor",light:"dark",
+   desc:"A cinderblock outbuilding, dark and dead. A grimy breaker panel dominates one wall. A faded stencil beside it reads: \"GREEN = genny start.  RED = LIVE MAINS — DO NOT TOUCH.\" There's exactly one door, and you're standing in it, facing the obelisk.",
+   comps:[{t:"man",id:"power",name:"Breaker Panel",icon:"🔌",verb:"Fiddle with the breaker panel"}]},
+ "1,-2.5":{id:"BUILD_BREAK",name:"Break Room",terrain:"indoor",env:"indoor",light:"dark",
+   desc:"The other half of the building, through an interior doorway: a moldering break room. A vending machine looms in the corner, screen dark.",
+   comps:[{t:"col",id:"cola",name:"Warm TAB-ish Cola",kind:"water",icon:"🥤",consumable:true,effects:{hydration:20,health:-3},grab:"You crack a warm, flat, vaguely radioactive cola. (+20 hydration, -3 health)"},
+          {t:"man",id:"vendor",name:"Vending Machine",icon:"📟",verb:"Use the vending machine"},
+          {t:"col",id:"green_keycard",name:"Green Keycard",kind:"part",icon:"💳",required:true,hidden:true,grab:"You pluck the glowing GREEN KEYCARD from the tray. (repair part)"}]},
+ "1,1.5":{id:"HATCH",name:"Cargo Hatch",terrain:"indoor",env:"indoor",light:"lit",
+   desc:"A chunk of your pod's cargo section, hatch jammed shut, emergency lighting flickering inside.",
+   comps:[{t:"man",id:"hatch",name:"Jammed Cargo Hatch",icon:"🚪",verb:"Override the hatch lock"},
+          {t:"col",id:"floatfoam",name:"Foam Crash-Padding",kind:"mat",icon:"🛟",grab:"You strip out a slab of buoyant foam crash-padding. Floats like a dream. (raft material)"},
+          {t:"col",id:"coolant_cell",name:"Coolant Cell",kind:"part",icon:"🧊",required:true,hidden:true,grab:"You unstrap the COOLANT CELL from the bulkhead. (repair part)"},
+          {t:"col",id:"phaser",name:"\"Phaser\" (label maker)",kind:"weapon",icon:"🔫",hidden:true,grab:"You claim the sleek 'phaser.' It's a label maker. It prints PEW."}]},
+ "-2,1":{id:"STATION",name:"Ranger Station",terrain:"indoor",env:"indoor",light:"lit",
+   desc:"A wood-paneled ranger cabin — shag carpet, a CRT hissing static, a dead rotary phone. A locked footlocker sits on the floor. A Post-it on the TV: \"COMBO = THE ANSWER. you know the one. —D.A.\"",
+   comps:[{t:"man",id:"locker",name:"Locked Footlocker",icon:"🧰",verb:"the footlocker"},
+          {t:"col",id:"puffs",name:"Family-Size Cheese Puffs",kind:"food",icon:"🧀",consumable:true,effects:{health:8},grab:"You demolish a bag of radioactively orange cheese puffs. (+8 health)"},
+          {t:"col",id:"flux_coil",name:"Flux Coil",kind:"part",icon:"🌀",required:true,hidden:true,grab:"You lift the FLUX COIL from its foam nest. (repair part)"}]},
+ "2,1":{id:"LAKESHORE",name:"Lakeshore",terrain:"forest",env:"outdoor",light:"lit",
+   desc:"A pebbled shore. Driftwood and pale reeds line the waterline.",
+   comps:[{t:"col",id:"driftwood",name:"Bundle of Driftwood",kind:"mat",icon:"🪵",grab:"You gather a bundle of sun-bleached driftwood. (raft material)"}]},
+ "-2,-1":{id:"VINE_THICKET",name:"Vine Thicket",terrain:"dense",env:"outdoor",light:"dark",
+   desc:"A wall of rubbery alien vines, thick as fire hoses.",
+   comps:[{t:"col",id:"vines",name:"Coil of Tough Vines",kind:"mat",icon:"🪢",grab:"You hack free a long coil of tough, ropy vines. (raft material)"}]},
+ "3,0.5":{id:"LAKE",name:"The Lake",terrain:"lake",env:"outdoor",light:"lit",
+   desc:"You are out on the misty lake, riding low on your raft. The far shore resolves out of the fog.",
+   comps:[{t:"col",id:"lake_water",name:"Lake Water",kind:"water",icon:"🌊",consumable:true,effects:{hydration:30,health:-6},grab:"You scoop lake water over the side. Brackish, with a hint of ozone. (+30 hydration, -6 health)"}]},
+ "4,1":{id:"DRONE",name:"Crashed Survey Drone",terrain:"ruin",env:"outdoor",light:"lit",
+   desc:"On the far shore, a crashed survey drone lies half-buried, panels splayed like a dead beetle.",
+   comps:[{t:"man",id:"drone",name:"Drone Memory Core",icon:"📡",verb:"Read the drone's last log"},
+          {t:"col",id:"ration",name:"Emergency Ration Cache",kind:"food",icon:"🥫",consumable:true,effects:{health:20,hydration:15},grab:"You crack the drone's ration cache. Actual edible food and a sealed canteen. (+20 health, +15 hydration)"}]},
+ "-1,1.5":{id:"HOLLOW",name:"Spore Hollow",terrain:"dense",env:"outdoor",light:"dark",
+   desc:"A dank hollow choked with mushrooms pulsing radioactive disco colors. Glittering spores hang in the air.",
+   comps:[{t:"col",id:"fungus",name:"Glowing Fungus",kind:"food",icon:"🍄",consumable:true,effects:{health:-18},grab:"You eat the glowing fungus, learning nothing. It fights back. (-18 health)"},
+          {t:"man",id:"spores",name:"Cloud of Glowing Spores",icon:"✨",verb:"Harvest the glowing spores"}]},
+ "2,-1":{id:"SNAKEGRASS",name:"Snakegrass Thicket",terrain:"dense",env:"outdoor",light:"dark",
+   desc:"Brush so thick you wade more than walk. Something rustles in a hollow log.",
+   comps:[{t:"man",id:"log",name:"Rustling Hollow Log",icon:"🐍",verb:"Reach into the hollow log"}]},
+ "-3,1.5":{id:"LEANTO",name:"Hermit's Lean-To",terrain:"indoor",env:"indoor",light:"dark",
+   desc:"A driftwood lean-to. A faded Polaroid of a grinning hermit and an unmistakable Bigfoot is pinned to a post.",
+   comps:[{t:"col",id:"beans",name:"Can of Mystery Beans",kind:"food",icon:"🥫",consumable:true,effects:{health:12,hydration:5},grab:"You eat cold beans like a gremlin. Restorative. (+12 health, +5 hydration)"},
+          {t:"col",id:"polaroid",name:"Hermit & Bigfoot Polaroid",kind:"junk",icon:"📸",grab:"You take the Polaroid. Pulitzer pending."}]},
+};
+
+/* Natural barriers (rivers, mountains, thicket) — undirected, by coord-key */
+const BLOCKED = [
+  {a:"3,1.5",b:"2,1",type:"river"}, {a:"3,1.5",b:"2,2",type:"river"},
+  {a:"3,2.5",b:"2,2",type:"river"}, {a:"3,2.5",b:"2,3",type:"river"}, {a:"4,1",b:"4,0",type:"river"},
+  {a:"-1,-1.5",b:"-2,-1",type:"mountains"}, {a:"-1,-1.5",b:"-2,-2",type:"mountains"}, {a:"-1,-2.5",b:"-2,-2",type:"mountains"},
+  {a:"1,2.5",b:"0,2",type:"thicket"}, {a:"1,2.5",b:"0,3",type:"thicket"},
+];
+
+/* Man-made buildings: a building is a set of hex IDs plus an explicit list
+   of entrances ({hex, dir}). Every OTHER edge from a building hex to a
+   non-building hex is automatically sealed as a 'wall' barrier. Future
+   buildings just declare their own hex set + however many entrances they
+   should have — the sealing logic below is generic. */
+const BUILDINGS = [
+  { hexes:["BUILD_GEN","BUILD_BREAK"], entrances:[{hex:"BUILD_GEN", dir:"SW"}] }
+];
+
+/* ==========================================================
+   SECTION: WORLD BUILD
+   (Deterministic + re-runnable, so restart() can call this again
+   and get a pristine map without any leftover mutated flags.)
+   ========================================================== */
+const HEXES = {}, COORD2ID = {}, BMAP = {};
+
+function rng(str){
+  let h = 2166136261;
+  for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
+  return () => { h ^= h << 13; h >>>= 0; h ^= h >>> 17; h ^= h << 5; h >>>= 0; return h / 4294967296; };
+}
+
+function buildLattice(){
+  const specialClone = JSON.parse(JSON.stringify(SPECIAL)); // fresh copy every call
+  const gn = { clearing:"Quiet Clearing", forest:"Alien Forest", dense:"Tangled Brush" };
+  const gd = {
+    clearing:["A break in the trees; the sky is an unfamiliar mauve.","Open ground scattered with iridescent grasses.","A small clearing, almost peaceful, almost."],
+    forest:["Tall glassy-barked trees filter the light to a green murk.","Forest, endless forest. Something chitters, then goes quiet.","Alien conifers crowd close, needles faintly humming."],
+    dense:["Vines and thorned creepers claw at your sleeves.","Undergrowth so dense you navigate by stubbornness.","The brush thickens into a snarl you shoulder through."]
+  };
+  for (let c = -4; c <= 4; c++){
+    const h = 9 - Math.abs(c);
+    const y0 = -(h - 1) / 2;
+    for (let i = 0; i < h; i++){
+      const y = y0 + i;
+      const key = c + "," + y;
+      if (specialClone[key]){
+        const sp = specialClone[key];
+        sp.pos = { x:c, y:y };
+        sp.disc = false;
+        HEXES[sp.id] = sp;
+        COORD2ID[key] = sp.id;
+      } else {
+        const r = rng("g" + key);
+        const t = r() < 0.16 ? "clearing" : (r() < 0.78 ? "forest" : "dense");
+        const id = "H" + ("" + c).replace("-","m") + "_" + ("" + y).replace("-","m").replace(".","p");
+        const comps = [];
+        if (r() < 0.2) comps.push(r() < 0.5 ? berries() : puddle());
+        HEXES[id] = { id, name:gn[t], terrain:t, env:"outdoor", light:(t==="dense"?"dark":"lit"),
+          disc:false, desc:gd[t][Math.floor(r()*3)%3], comps, pos:{x:c,y:y} };
+        COORD2ID[key] = id;
+      }
+    }
+  }
+}
+
+function applyBlockedEdges(){
+  for (const e of BLOCKED) BMAP[[e.a, e.b].sort().join("|")] = e.type;
+}
+
+function applyBuildingWalls(){
+  for (const bld of BUILDINGS){
+    const hexSet = new Set(bld.hexes);
+    for (const hexId of bld.hexes){
+      for (const dir of DORD){
+        const nId = neighbor(hexId, dir);
+        if (!nId || hexSet.has(nId)) continue;          // no neighbor, or internal connection: leave open
+        const isEntrance = bld.entrances.some(e => e.hex === hexId && e.dir === dir);
+        if (isEntrance) continue;                         // the one designated door: leave open
+        const key = [posKey(hexId), posKey(nId)].sort().join("|");
+        BMAP[key] = "wall";
+      }
+    }
+  }
+}
+
+function initWorld(){
+  for (const k in HEXES) delete HEXES[k];
+  for (const k in COORD2ID) delete COORD2ID[k];
+  for (const k in BMAP) delete BMAP[k];
+  buildLattice();
+  applyBlockedEdges();
+  applyBuildingWalls();
+}
+
+/* ==========================================================
+   SECTION: STATE
+   ========================================================== */
+function freshState(){
+  return {
+    cur:"FURROW", turn:0, mode:"play",
+    decoded:false, power:false, hasRaft:false,
+    shift:0, combo:"", choice:null,
+    warned:0, over:false,
+    inv:[], health:100, hydration:100,
+    _acts:[], _hpW:false, _hydW:false
+  };
+}
+let S = freshState();
+
+/* ==========================================================
+   SECTION: HELPERS  (pure, no rendering)
+   ========================================================== */
+const $ = id => document.getElementById(id);
+const H = id => HEXES[id];
+
+function posKey(id){ const p = H(id).pos; return p.x + "," + p.y; }
+function neighbor(id, dir){ const p = H(id).pos, d = DIRS[dir]; return COORD2ID[(p.x+d[0]) + "," + (p.y+d[1])] || null; }
+function edgeType(a, b){ return BMAP[[posKey(a), posKey(b)].sort().join("|")] || null; }
+
+function barrierKind(id, dir){
+  const n = neighbor(id, dir);
+  if (!n) return null;
+  const t = edgeType(id, n);
+  if (t === "mountains") return "mountains";
+  if (t === "thicket") return "thicket";
+  if (t === "wall") return "wall";
+  if (t === "river") return "water";
+  if (H(n).terrain === "lake") return "water";
+  return null;
+}
+function nextToWater(id){ return DORD.some(d => barrierKind(id, d) === "water"); }
+function has(id){ return S.inv.some(i => i.id === id); }
+function comp(hx, cid){ return H(hx).comps.find(c => c.id === cid); }
+function clamp(v){ return Math.max(0, Math.min(100, v)); }
+
+function log(m, c){
+  const p = document.createElement("p");
+  p.className = c || "you";
+  p.textContent = m;
+  const L = $("log");
+  L.appendChild(p);
+  L.scrollTop = L.scrollHeight;
+}
+
+// Issue #2 fix: classify an item's tone by NET effect, not health's sign alone.
+function effectTone(eff){
+  if (!eff) return "ev";
+  const net = (eff.health || 0) + (eff.hydration || 0);
+  if (net > 0) return "good";
+  if (net < 0) return "bad";
+  return "ev";
+}
+
+/* ==========================================================
+   SECTION: RENDER — MAP
+   NOTE (Issue #4, no action needed yet): this section and the controls
+   section below build DOM via innerHTML template strings. Nothing
+   player-typed flows into them today. Revisit (escape input, or switch
+   to textContent/DOM APIs) the moment a free-text field is added.
+   ========================================================== */
+const R = 44, SQ3 = 1.7320508, PI = Math.PI, deg = d => d * PI / 180;
+const INK = "#5a4326", INK2 = "#7c5d34", PARCH = "#e6d2a6", DARK = "#241809";
+const WATER = "#5f7d74", WBLUE = "#4f7f8a", MIST = "rgba(232,224,205,.6)", RED = "#9e3b2e";
+const DANG = { NW:-150, N:-90, NE:-30, SE:30, S:90, SW:150 };
+const VANG = [-120,-60,0,60,120,180];
+
+function center(id){ const p = H(id).pos; return { x:p.x*1.5*R, y:p.y*SQ3*R }; }
+function edgeState(id, d){ const n = neighbor(id, d); if (!n) return "void"; if (barrierKind(id, d)) return "blocked"; return H(n).disc ? "merge" : "open"; }
+
+function pine(x,y,s,col){ return `<path d="M${x.toFixed(1)} ${(y-s).toFixed(1)} L${(x-s*0.55).toFixed(1)} ${(y+s*0.4).toFixed(1)} L${(x+s*0.55).toFixed(1)} ${(y+s*0.4).toFixed(1)} Z" fill="${col}"/><line x1="${x.toFixed(1)}" y1="${(y+s*0.4).toFixed(1)}" x2="${x.toFixed(1)}" y2="${(y+s*0.85).toFixed(1)}" stroke="${col}" stroke-width="1.1"/>`; }
+function trees(id,cx,cy,n,col,sz){ const r=rng(id); let a=[]; for(let i=0;i<n;i++){ const ang=r()*6.283,rd=r()*R*0.5; a.push([cx+Math.cos(ang)*rd,cy+Math.sin(ang)*rd*0.85,sz*(0.8+r()*0.5)]); } a.sort((p,q)=>p[1]-q[1]); return a.map(p=>pine(p[0],p[1],p[2],col)).join(""); }
+function wavesArt(cx,cy){ let s=""; for(let i=0;i<3;i++){ const yy=cy-9+i*9; s+=`<path d="M${(cx-16).toFixed(1)} ${yy.toFixed(1)} q4 -3 8 0 t8 0 t8 0" stroke="${WATER}" stroke-width="1.5" fill="none" opacity=".9"/>`; } return s; }
+function ruinArt(cx,cy){ return `<rect x="${(cx-11).toFixed(1)}" y="${(cy-7).toFixed(1)}" width="4.5" height="14" fill="${INK}"/><rect x="${(cx+2).toFixed(1)}" y="${(cy-11).toFixed(1)}" width="4.5" height="18" fill="${INK}"/><line x1="${(cx-15).toFixed(1)}" y1="${(cy+8).toFixed(1)}" x2="${(cx+13).toFixed(1)}" y2="${(cy+8).toFixed(1)}" stroke="${INK}" stroke-width="1.5"/>`; }
+function hutArt(cx,cy){ return `<rect x="${(cx-10).toFixed(1)}" y="${(cy-1).toFixed(1)}" width="20" height="13" fill="#cdb583" stroke="${INK}" stroke-width="1.5"/><path d="M${(cx-13).toFixed(1)} ${(cy-1).toFixed(1)} L${cx.toFixed(1)} ${(cy-13).toFixed(1)} L${(cx+13).toFixed(1)} ${(cy-1).toFixed(1)} Z" fill="${INK2}"/>`; }
+function grassArt(id,cx,cy){ const r=rng(id); let s=""; for(let i=0;i<4;i++){ const x=cx+(r()-.5)*R*0.7,y=cy+(r()-.5)*R*0.5; s+=`<path d="M${x.toFixed(1)} ${y.toFixed(1)} l-2 -5 M${x.toFixed(1)} ${y.toFixed(1)} l0 -6 M${x.toFixed(1)} ${y.toFixed(1)} l2 -5" stroke="${INK2}" stroke-width="1" fill="none"/>`; } return s; }
+function terrainArt(id){ const h=H(id),c=center(id); switch(h.terrain){
+  case "forest": return trees(id,c.x,c.y,4,INK,8);
+  case "dense": return trees(id,c.x,c.y,6,INK,8);
+  case "water": case "lake": return wavesArt(c.x,c.y);
+  case "ruin": return ruinArt(c.x,c.y);
+  case "indoor": return hutArt(c.x,c.y);
+  default: return grassArt(id,c.x,c.y);
+} }
+function medallion(x,y,icon){ return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="10" fill="#f3e6c4" stroke="${INK}" stroke-width="1.4"/><text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle" font-size="12">${icon}</text>`; }
+
+function blobPoints(id){
+  const c = center(id), rnd = rng("blob"+id);
+  const midR = s => s==="merge"?1.05 : s==="blocked"?0.44 : s==="open"?0.92 : 0.90;
+  const vtxF = s => s==="merge"?1.05 : s==="blocked"?0.54 : s==="open"?0.96 : 0.95;
+  let pts = [];
+  for (let i = 0; i < 6; i++){
+    const d = DORD[i], dn = DORD[(i+1)%6];
+    const a1 = deg(DANG[d] + (rnd()-0.5)*7), r1 = midR(edgeState(id,d)) * R * (0.94 + rnd()*0.12);
+    pts.push([c.x + Math.cos(a1)*r1, c.y + Math.sin(a1)*r1]);
+    const vf = Math.min(vtxF(edgeState(id,d)), vtxF(edgeState(id,dn)));
+    const a2 = deg(VANG[i] + (rnd()-0.5)*7), r2 = vf * R * (0.94 + rnd()*0.12);
+    pts.push([c.x + Math.cos(a2)*r2, c.y + Math.sin(a2)*r2]);
+  }
+  return pts;
+}
+const polyStr = pts => pts.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+const expand = (pts, c, f) => pts.map(p => [c.x + (p[0]-c.x)*f, c.y + (p[1]-c.y)*f]);
+function edgeCorners(id, d){ const c = center(id), a1 = deg(DANG[d]-30), a2 = deg(DANG[d]+30); return [[c.x+R*Math.cos(a1), c.y+R*Math.sin(a1)], [c.x+R*Math.cos(a2), c.y+R*Math.sin(a2)]]; }
+
+/* natural barriers: mountains / thicket */
+function xhatchBand(id, d, kind){
+  const c = center(id), [p1,p2] = edgeCorners(id,d), qf = 0.42;
+  const q1 = [c.x+(p1[0]-c.x)*qf, c.y+(p1[1]-c.y)*qf], q2 = [c.x+(p2[0]-c.x)*qf, c.y+(p2[1]-c.y)*qf];
+  const tint = kind==="mountains" ? "#c4af86" : "#c7b990";
+  const poly = polyStr([p1,p2,q2,q1]);
+  return `<polygon points="${poly}" fill="${tint}"/><polygon points="${poly}" fill="url(#xh)" opacity=".85"/>`;
+}
+function ridge(p1, p2){
+  const seg=4, h=10; let s="";
+  for (let i=0;i<seg;i++){
+    const t0=i/seg, t1=(i+1)/seg;
+    const x0=p1[0]+(p2[0]-p1[0])*t0, y0=p1[1]+(p2[1]-p1[1])*t0;
+    const x1=p1[0]+(p2[0]-p1[0])*t1, y1=p1[1]+(p2[1]-p1[1])*t1;
+    const mx=(x0+x1)/2, my=(y0+y1)/2;
+    s += `<path d="M${x0.toFixed(1)} ${y0.toFixed(1)} L${mx.toFixed(1)} ${(my-h).toFixed(1)} L${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="#8a7b5a" stroke="${INK}" stroke-width="1"/>`;
+  }
+  return s;
+}
+function pinesAlong(p1, p2){ let s=""; [0.25,0.5,0.75].forEach(t => { s += pine(p1[0]+(p2[0]-p1[0])*t, p1[1]+(p2[1]-p1[1])*t-2, 9, INK); }); return s; }
+
+/* man-made barrier: building wall (visually distinct from natural barriers) */
+function wallBand(id, d){
+  const c = center(id), [p1,p2] = edgeCorners(id,d), qf = 0.40;
+  const q1 = [c.x+(p1[0]-c.x)*qf, c.y+(p1[1]-c.y)*qf], q2 = [c.x+(p2[0]-c.x)*qf, c.y+(p2[1]-c.y)*qf];
+  const poly = polyStr([p1,p2,q2,q1]);
+  return `<polygon points="${poly}" fill="#8d8675"/><polygon points="${poly}" fill="url(#xh)" opacity=".6"/>`;
+}
+function wallGlyph(p1, p2){
+  const segs = 5;
+  let s = `<line x1="${p1[0].toFixed(1)}" y1="${p1[1].toFixed(1)}" x2="${p2[0].toFixed(1)}" y2="${p2[1].toFixed(1)}" stroke="${INK}" stroke-width="3"/>`;
+  for (let i=1;i<segs;i++){
+    const t = i/segs;
+    const x = p1[0]+(p2[0]-p1[0])*t, y = p1[1]+(p2[1]-p1[1])*t;
+    s += `<line x1="${x.toFixed(1)}" y1="${(y-3).toFixed(1)}" x2="${x.toFixed(1)}" y2="${(y+3).toFixed(1)}" stroke="${INK}" stroke-width="1.5"/>`;
+  }
+  return s;
+}
+
+/* river / lake: irregular near-bank + misty middle, far side stays hidden */
+function waterBand(id, d){
+  const c = center(id), [p1,p2] = edgeCorners(id,d), qf = 0.40, seed = rng("w"+id+d);
+  const q1 = [c.x+(p1[0]-c.x)*qf, c.y+(p1[1]-c.y)*qf], q2 = [c.x+(p2[0]-c.x)*qf, c.y+(p2[1]-c.y)*qf];
+  const dx = q2[0]-q1[0], dy = q2[1]-q1[1], L = Math.hypot(dx,dy)||1, nx=-dy/L, ny=dx/L, segs=5;
+  let bank = [q1];
+  for (let i=1;i<segs;i++){ const t=i/segs, off=(seed()-0.5)*10; bank.push([q1[0]+dx*t+nx*off, q1[1]+dy*t+ny*off]); }
+  bank.push(q2);
+  const fill = polyStr([p1,p2].concat(bank.slice().reverse()));
+  let s = `<polygon points="${fill}" fill="${WBLUE}" opacity=".9"/>`;
+  for (let i=0;i<2;i++){
+    const f = 0.62+i*0.18;
+    const w1=[c.x+(p1[0]-c.x)*f,c.y+(p1[1]-c.y)*f], w2=[c.x+(p2[0]-c.x)*f,c.y+(p2[1]-c.y)*f];
+    s += `<path d="M${w1[0].toFixed(1)} ${w1[1].toFixed(1)} Q${((w1[0]+w2[0])/2+nx*4).toFixed(1)} ${((w1[1]+w2[1])/2+ny*4).toFixed(1)} ${w2[0].toFixed(1)} ${w2[1].toFixed(1)}" stroke="#bfe0e6" stroke-width="1" fill="none" opacity=".7"/>`;
+  }
+  const m1=[c.x+(p1[0]-c.x)*0.78,c.y+(p1[1]-c.y)*0.78], m2=[c.x+(p2[0]-c.x)*0.78,c.y+(p2[1]-c.y)*0.78];
+  s += `<polygon points="${polyStr([p1,p2,m2,m1])}" fill="${MIST}"/>`;
+  s += `<path d="M${bank.map(b=>b[0].toFixed(1)+" "+b[1].toFixed(1)).join(" L")}" stroke="#37606a" stroke-width="1.6" fill="none"/>`;
+  return s;
+}
+
+function renderMap(){
+  const disc = Object.keys(HEXES).filter(k => H(k).disc);
+  const cs = disc.map(center);
+  let minx = Math.min(...cs.map(c=>c.x)), maxx = Math.max(...cs.map(c=>c.x));
+  let miny = Math.min(...cs.map(c=>c.y)), maxy = Math.max(...cs.map(c=>c.y));
+  const pad = R*1.5; minx-=pad; maxx+=pad; miny-=pad; maxy+=pad;
+  const W = maxx-minx, Ht = maxy-miny;
+
+  let g = `<svg viewBox="${minx.toFixed(1)} ${miny.toFixed(1)} ${W.toFixed(1)} ${Ht.toFixed(1)}" xmlns="http://www.w3.org/2000/svg" font-family="Georgia,'Times New Roman',serif">`;
+  g += `<defs><filter id="halo"><feGaussianBlur stdDeviation="3.2"/></filter><filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .08 0"/></filter><pattern id="xh" width="7" height="7" patternUnits="userSpaceOnUse"><path d="M0 0 L7 7 M7 0 L0 7" stroke="${INK}" stroke-width="0.8"/></pattern></defs>`;
+  g += `<rect x="${minx}" y="${miny}" width="${W}" height="${Ht}" fill="#2c2010"/><rect x="${minx}" y="${miny}" width="${W}" height="${Ht}" fill="#160f06" opacity=".55"/>`;
+
+  const blobs = {}; disc.forEach(k => blobs[k] = blobPoints(k));
+
+  let halo = `<g filter="url(#halo)">`;
+  disc.forEach(k => halo += `<polygon points="${polyStr(expand(blobs[k], center(k), 1.08))}" fill="${DARK}"/>`);
+  halo += `</g>`;
+
+  let parch = "";
+  disc.forEach(k => { const fill = H(k).terrain==="lake" ? WBLUE : PARCH; parch += `<polygon points="${polyStr(blobs[k])}" fill="${fill}" stroke="${fill}" stroke-width="1"/>`; });
+
+  let bands = "", glyphs = "";
+  disc.forEach(k => {
+    for (const d of DORD){
+      const kind = barrierKind(k, d);
+      if (!kind) continue;
+      const n = neighbor(k, d);
+      if (kind === "water"){
+        bands += waterBand(k, d);
+      } else if (kind === "wall"){
+        bands += wallBand(k, d);
+        if (!H(n).disc || posKey(k) < posKey(n)){
+          const [p1,p2] = edgeCorners(k, d);
+          glyphs += wallGlyph(p1, p2);
+        }
+      } else {
+        bands += xhatchBand(k, d, kind);
+        if (!H(n).disc || posKey(k) < posKey(n)){
+          const [p1,p2] = edgeCorners(k, d);
+          glyphs += kind === "mountains" ? ridge(p1,p2) : pinesAlong(p1,p2);
+        }
+      }
+    }
+  });
+
+  let trails = ""; const drawn = {};
+  disc.forEach(k => {
+    const c = center(k);
+    for (const d of DORD){
+      const n = neighbor(k, d);
+      if (!n || barrierKind(k, d)) continue;
+      const key = [k,n].sort().join("|");
+      if (H(n).disc){
+        if (drawn[key]) continue;
+        drawn[key] = 1;
+        const cn = center(n);
+        trails += `<line x1="${c.x.toFixed(1)}" y1="${c.y.toFixed(1)}" x2="${cn.x.toFixed(1)}" y2="${cn.y.toFixed(1)}" stroke="${INK}" stroke-width="2.4" stroke-dasharray="1.5 5" stroke-linecap="round"/>`;
+      } else {
+        const dv = DIRS[d], vx = dv[0]*1.5*R, vy = dv[1]*SQ3*R, L = Math.hypot(vx,vy);
+        trails += `<line x1="${(c.x+vx/L*R*0.5).toFixed(1)}" y1="${(c.y+vy/L*R*0.5).toFixed(1)}" x2="${(c.x+vx/L*(R+10)).toFixed(1)}" y2="${(c.y+vy/L*(R+10)).toFixed(1)}" stroke="${INK2}" stroke-width="2.2" stroke-dasharray="1.5 5" stroke-linecap="round" opacity=".75"/>`;
+      }
+    }
+  });
+
+  let art = "", meds = "", labels = "";
+  disc.forEach(k => {
+    const h = H(k), c = center(k);
+    art += terrainArt(k);
+    const icons = [];
+    h.comps.forEach(cp => { if (cp.hidden) return; if (cp.t==="col" && !cp.taken) icons.push(cp.icon); if (cp.t==="man" && !cp.done) icons.push(cp.icon); });
+    icons.slice(0,3).forEach((ic,i) => { const span = (Math.min(icons.length,3)-1)*13; meds += medallion(c.x-span/2+i*13, c.y-R*0.4, ic); });
+    labels += `<text x="${c.x}" y="${(c.y+R*0.58).toFixed(1)}" text-anchor="middle" font-size="9" font-style="italic" fill="${INK}" paint-order="stroke" stroke="${H(k).terrain==='lake'?WBLUE:PARCH}" stroke-width="2.6">${h.name}</text>`;
+  });
+
+  const cc = center(S.cur);
+  const marker = `<circle cx="${cc.x}" cy="${(cc.y+R*0.16).toFixed(1)}" r="6.5" fill="none" stroke="${RED}" stroke-width="2"><animate attributeName="r" values="6.5;9;6.5" dur="1.4s" repeatCount="indefinite"/></circle><circle cx="${cc.x}" cy="${(cc.y+R*0.16).toFixed(1)}" r="2.4" fill="${RED}"/>`;
+
+  g += halo + parch + bands + glyphs + trails + art + meds + labels + marker;
+  g += `<rect x="${minx}" y="${miny}" width="${W}" height="${Ht}" filter="url(#rough)"/>`;
+  g += `<rect x="${(minx+5).toFixed(1)}" y="${(miny+5).toFixed(1)}" width="${(W-10).toFixed(1)}" height="${(Ht-10).toFixed(1)}" fill="none" stroke="${INK}" stroke-width="2.5" rx="3"/>`;
+  const cxr = maxx-30, cyr = miny+32, s = 14;
+  g += `<circle cx="${cxr.toFixed(1)}" cy="${cyr.toFixed(1)}" r="${s+4}" fill="#efe0bb" stroke="${INK}" stroke-width="1.2"/><path d="M${cxr.toFixed(1)} ${(cyr-s).toFixed(1)} L${(cxr+s*0.24).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr+s).toFixed(1)} L${(cxr-s*0.24).toFixed(1)} ${cyr.toFixed(1)} Z" fill="${INK}"/><path d="M${(cxr-s).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr-s*0.24).toFixed(1)} L${(cxr+s).toFixed(1)} ${cyr.toFixed(1)} L${cxr.toFixed(1)} ${(cyr+s*0.24).toFixed(1)} Z" fill="${INK2}"/><text x="${cxr.toFixed(1)}" y="${(cyr-s-3).toFixed(1)}" text-anchor="middle" font-size="9" fill="${INK}">N</text>`;
+  g += `<text x="${(minx+16).toFixed(1)}" y="${(miny+24).toFixed(1)}" font-size="12" fill="${INK}" font-style="italic">~ Field Chart ~</text>`;
+  g += `</svg>`;
+  $("map").innerHTML = g;
+}
+
+/* ==========================================================
+   SECTION: RENDER — STATUS (status strip: doom + six meters; inventory)
+   ========================================================== */
+function renderVMeters(){
+  const cells = [
+    { active:true,  label:"HEALTH",    value:S.health,    cls:"hp"  },
+    { active:true,  label:"HYDRATION", value:S.hydration, cls:"hyd" },
+    { active:false, label:"NUTRITION" },
+    { active:false, label:"CLARITY"   },
+    { active:false, label:"STAMINA"   },
+    { active:false, label:"WARMTH"    },
+  ];
+  let html = "";
+  cells.forEach(c => {
+    if (c.active){
+      const pct = clamp(c.value);
+      html += `<div class="vmeter">
+        <div class="vtrack"><div class="vfill ${c.cls}" style="height:${pct}%"></div></div>
+        <div class="vlabel"><b>${Math.round(pct)}</b>${c.label}</div>
+      </div>`;
+    } else {
+      html += `<div class="vmeter disabled">
+        <div class="vtrack"><div class="vfill grey"></div></div>
+        <div class="vlabel"><b>—</b>${c.label}<span class="soon">soon</span></div>
+      </div>`;
+    }
+  });
+  $("vgrid").innerHTML = html;
+}
+
+function renderStatus(){
+  const h = H(S.cur);
+  $("locName").textContent = h.name;
+  $("terrBadge").textContent = TERRAIN[h.terrain].label.toUpperCase();
+  $("envBadge").textContent = h.env === "outdoor" ? "OUTDOORS" : "INDOORS";
+  $("lightBadge").textContent = h.light === "lit" ? "WELL-LIT" : "DARK";
+  renderVMeters();
+  const pct = Math.min(100, Math.round(S.turn / DOOM_LIMIT * 100));
+  $("doomBar").style.height = pct + "%";   // vertical fill, not width
+  $("doomTxt").textContent = pct + "%";
+  const inv = $("inv");
+  if (!S.inv.length){
+    inv.innerHTML = '<span class="empty">empty — go scavenge, you packrat</span>';
+  } else {
+    inv.innerHTML = S.inv.map(i => `<span class="item ${i.kind==='part'?'part':i.kind==='mat'?'mat':i.kind==='tool'?'tool':''}">${i.icon||""} ${i.name}</span>`).join("");
+  }
+}
+
+/* ==========================================================
+   SECTION: RENDER — CONTROLS  (movement pad removed; keyboard-only moves)
+   ========================================================== */
+function buildActions(){
+  const h = H(S.cur), acts = [];
+  h.comps.forEach(c => {
+    if (c.t==="col" && !c.taken && !c.hidden){
+      const verb = c.consumable ? (c.kind==="water" ? "Drink the " : "Eat the ") : "Take the ";
+      acts.push({ label: verb + c.name, fn: () => takeItem(c) });
+    }
+  });
+  h.comps.forEach(c => {
+    if (c.t==="man" && !c.done){
+      if (c.id === "locker"){
+        acts.push({ label:"Try the footlocker combination", fn: openCombo });
+        if (has("rock")) acts.push({ label:"Smash the footlocker with the heavy rock", fn: smashLocker });
+      } else {
+        acts.push({ label: c.verb, fn: () => doManipulable(c) });
+      }
+    }
+  });
+  if (!S.hasRaft && nextToWater(S.cur) && RAFT_MAT.every(has)){
+    acts.push({ label:"Lash the driftwood, vines & foam into a raft", fn: buildRaft });
+  }
+  return acts;
+}
+
+function renderControls(){
+  if (S.over){
+    $("controlArea").innerHTML = '<div class="hint">— transmission ended —</div><button class="k restartBtn" onclick="restart()">↺ Restart from the crash</button>';
+    return;
+  }
+  if (S.mode === "decode") { renderDecoder(); return; }
+  if (S.mode === "combo")  { renderCombo();   return; }
+  if (S.mode === "choice") { renderChoice();  return; }
+
+  const acts = buildActions();
+  S._acts = acts;
+  let html = `<div class="acts">`;
+  acts.forEach((a,i) => { html += `<button class="k" onclick="runAction(${i})"><span class="num">${i+1}</span>${a.label}</button>`; });
+  html += `<button class="k" onclick="navComp()"><span class="num">H</span>Consult the Nav-Comp (hints)</button></div>`;
+  html += `<div class="hint">⌨ Move: <b>Q W E / A S D</b> &nbsp;•&nbsp; Actions: <b>1–9</b> &nbsp;•&nbsp; Hints: <b>H</b></div>`;
+  $("controlArea").innerHTML = html;
+}
+
+function renderChoice(){
+  const ch = S.choice;
+  let h = `<div class="overlay"><div class="prompt">${ch.prompt}</div><div class="acts">`;
+  ch.options.forEach((o,i) => { h += `<button class="k" onclick="pickChoice(${i})"><span class="num">${i+1}</span>${o.label}</button>`; });
+  h += `</div><div class="hint">⌨ press <b>1–${ch.options.length}</b> &nbsp;•&nbsp; <b>Esc</b> to back away</div></div>`;
+  $("controlArea").innerHTML = h;
+}
+function pickChoice(i){ const ch = S.choice; if (ch && ch.options[i]) ch.options[i].fn(); }
+function cancelMode(){ S.mode = "play"; S.choice = null; renderControls(); }
+
+/* ==========================================================
+   SECTION: GAME LOGIC — vitals
+   ========================================================== */
+function applyEffect(eff){
+  if (!eff) return;
+  if (eff.health != null) S.health = clamp(S.health + eff.health);
+  if (eff.hydration != null) S.hydration = clamp(S.hydration + eff.hydration);
+}
+
+function checkVitals(){
+  if (S.health <= 0 && !S.over){
+    S.over = true;
+    log("You sink to the alien dirt and decline to get back up. Nav-Comp's final entry: 'Vitals: nope.'\n\n☠ GAME OVER. ☠", "bad");
+    refresh();
+    return true;
+  }
+  if (S.health <= LOW_WARN && !S._hpW){ S._hpW = true; log("You're in rough shape. Find something restorative before you keel over.", "bad"); }
+  else if (S.health > LOW_WARN) S._hpW = false;
+  if (S.hydration <= LOW_WARN && !S._hydW){ S._hydW = true; log("Your throat's like sandpaper. Water. Now.", "bad"); }
+  else if (S.hydration > LOW_WARN) S._hydW = false;
+  return false;
+}
+
+/* ==========================================================
+   SECTION: GAME LOGIC — movement
+   ========================================================== */
+function surroundings(id){
+  let water = [], peaks = [], brush = [], walls = [];
+  for (const d of DORD){
+    const k = barrierKind(id, d), n = neighbor(id, d);
+    if (k === "water") water.push({ d, lake: n && H(n).terrain==="lake" });
+    else if (k === "mountains") peaks.push(d);
+    else if (k === "thicket") brush.push(d);
+    else if (k === "wall") walls.push(d);
+  }
+  let out = [];
+  if (water.length){
+    const lake = water.some(w => w.lake);
+    out.push("To the " + water.map(w=>DWORD[w.d]).join(" and ") + " lies a wide " + (lake?"lake":"river") +
+      ", its far side swallowed by drifting mist — it doesn't look like you can swim across.");
+  }
+  if (peaks.length) out.push("Sheer peaks wall off the " + peaks.map(d=>DWORD[d]).join(" and ") + ".");
+  if (brush.length) out.push("The brush to the " + brush.map(d=>DWORD[d]).join(" and ") + " is too thick to push through.");
+  if (walls.length) out.push("A solid wall seals off the " + walls.map(d=>DWORD[d]).join(" and ") + " side of the building.");
+  return out.join(" ");
+}
+
+function move(dir){
+  if (S.over || S.mode !== "play") return;
+  const n = neighbor(S.cur, dir);
+  if (!n){ log("No way through — just more wall-to-wall forest that direction.", "dim"); return; }
+
+  const k = barrierKind(S.cur, dir);
+  if (k === "mountains"){ log("A wall of jagged peaks blocks the way. You are not, it turns out, a goat.", "dim"); return; }
+  if (k === "thicket"){ log("The brush is an impenetrable wall of thorns. Hard pass.", "dim"); return; }
+  if (k === "wall"){ log("A solid wall blocks the way. This building keeps to one door.", "dim"); return; }
+
+  let crossing = false;
+  if (k === "water"){
+    if (S.hasRaft) crossing = true;
+    else { openSwimChoice(dir); return; }
+  }
+
+  S.cur = n;
+  S.turn++;
+  const h = H(n), first = !h.disc;
+  h.disc = true;
+  S.hydration = clamp(S.hydration - TERRAIN[h.terrain].hyd);
+  if (S.hydration <= 0){
+    S.health = clamp(S.health - DEHYDRATION_DMG);
+    log("Dehydration gnaws at you as you push on. (-" + DEHYDRATION_DMG + " health)", "bad");
+  }
+
+  const extra = surroundings(n);
+  const verb = crossing ? "You paddle across on the raft and step ashore at the "
+             : first ? "You push through into the "
+             : "You return to the ";
+  log(verb + h.name + ".\n" + h.desc + (extra ? " " + extra : ""), "you");
+
+  if (checkVitals()) return;
+  checkDoom();
+  refresh();
+}
+
+function openSwimChoice(dir){
+  const n = neighbor(S.cur, dir);
+  const lake = H(n).terrain === "lake";
+  const w = lake ? "lake" : "river";
+  S.mode = "choice";
+  S.choice = {
+    prompt: "The " + w + " is wide and the far bank is lost in mist. It really doesn't look like you can swim across. Try anyway?",
+    options: [
+      { label:"Swim for it", fn: () => swimDeath(w) },
+      { label:"Back away (stay put)", fn: cancelMode },
+    ]
+  };
+  renderControls();
+}
+function swimDeath(w){
+  S.over = true; S.mode = "play";
+  const ends = [
+    "You wade in. Three strokes out, something with far too many eyes wraps around your ankle and pulls. The mist closes over the ripples.",
+    "You strike out for the far shore. The current has other plans, and so, apparently, does the thing living in it.",
+    "Halfway across, your boots fill, the cold takes your legs, and the " + w + " takes the rest.",
+  ];
+  log(ends[Math.floor(Math.random()*ends.length)] + "\n\n☠ GAME OVER — you drowned (ish). ☠", "bad");
+  refresh();
+}
+function buildRaft(){
+  S.hasRaft = true;
+  S.inv = S.inv.filter(i => !RAFT_MAT.includes(i.id));
+  log("You lash the driftwood together with the vines and strap the foam underneath. It is, generously, a raft. It floats. Mostly.", "good");
+  log("Now you can cross the water — pick a 🌊 direction and paddle.", "nav");
+  refresh();
+}
+
+/* ==========================================================
+   SECTION: GAME LOGIC — items & manipulables
+   ========================================================== */
+function takeItem(c){
+  applyEffect(c.effects);
+  if (c.consumable){
+    c.taken = true;
+    log(c.grab, effectTone(c.effects));
+  } else {
+    c.taken = true;
+    S.inv.push({ id:c.id, name:c.name, kind:c.kind, icon:c.icon });
+    log(c.grab, c.kind === "part" ? "good" : "ev");
+  }
+  if (checkVitals()) return;
+  refresh();
+}
+
+function doManipulable(c){
+  switch (c.id){
+    case "obelisk":
+      openDecoder();
+      return;
+    case "transport":
+      attemptEscape();
+      return;
+    case "power":
+      openPowerChoice();
+      return;
+    case "vendor":
+      if (!S.power){
+        log("You jab the buttons. Nothing. The machine's dark and dead — no power. There must be a generator somewhere in this building.", "dim");
+        return;
+      }
+      c.done = true;
+      { const kc = comp("BUILD_BREAK","green_keycard"); if (kc) kc.hidden = false; }
+      log("Powered up, the machine wheezes to life, blinks a cheerful 8-bit smile, and drops something into the tray with a CLUNK: a GREEN KEYCARD. (Grab it.)", "good");
+      break;
+    case "hatch":
+      c.done = true;
+      H("HATCH").comps.forEach(x => { if (x.hidden) x.hidden = false; });
+      log("You hammer the override until the hatch screeches open: a COOLANT CELL on the bulkhead and a sleek 'phaser' (it's a label maker).", "ev");
+      break;
+    case "spores":
+      c.done = true;
+      applyEffect({ health:-8 });
+      S.inv.push({ id:"spore_pouch", name:"Pouch of Glowing Spores", kind:"junk", icon:"✨" });
+      log("You scoop spores into a pouch, immediately regret it, and sneeze a small rainbow. (-8 health)", "bad");
+      break;
+    case "log":
+      c.done = true;
+      applyEffect({ health:-22 });
+      S.inv.push({ id:"rabbitfoot", name:"Rabbit's Foot (ineffective)", kind:"junk", icon:"🐾" });
+      log("You reach into the log. The log reaches back. SNAKEBITE. (-22 health) You retrieve a rabbit's foot, which was not, to be clear, lucky.", "bad");
+      break;
+    case "drone":
+      c.done = true;
+      log("The drone's memory core sputters out its final log: a survey team, a storm, a thing in the lake, and a last entry that just reads 'DON'T SWIM.' Noted. Belatedly.", "ev");
+      break;
+  }
+  if (checkVitals()) return;
+  refresh();
+}
+function runAction(i){ const a = (S._acts||[])[i]; if (a) a.fn(); }
+
+/* ==========================================================
+   SECTION: GAME LOGIC — power-switch curiosity trap
+   ========================================================== */
+function openPowerChoice(){
+  S.mode = "choice";
+  S.choice = {
+    prompt: "A breaker panel of unlabeled levers and one very red wire. The stencil said GREEN starts the generator and RED is live mains. Curiosity tugs at you. What do you touch?",
+    options: [
+      { label:"Throw the GREEN breaker", fn: powerOn },
+      { label:"Yank the RED wire (it's right there)", fn: electrocute },
+      { label:"Flip the unlabeled switch", fn: () => { cancelMode(); log("The unlabeled switch emits a sad clunk and does nothing. Probably for the best.", "ev"); } },
+    ]
+  };
+  renderControls();
+}
+function powerOn(){
+  S.power = true; S.mode = "play"; S.choice = null;
+  const m = comp("BUILD_GEN","power"); if (m) m.done = true;
+  log("You throw the green breaker. The generator coughs, catches, and the building shudders awake — lights buzz on, and somewhere next door a vending machine hums to life.", "good");
+  refresh();
+}
+function electrocute(){
+  S.over = true; S.mode = "play";
+  log("You grab the red wire. The red wire grabs back. There is a flash, a smell like burnt pennies and regret, and the Nav-Comp logging 'told you so' as the lights go out for good.\n\n☠ GAME OVER — electrocuted. ☠", "bad");
+  refresh();
+}
+
+/* ==========================================================
+   SECTION: PUZZLES — decoder ring
+   ========================================================== */
+const PLAINTEXT = "BRING THE COOLANT CELL, THE FLUX COIL, AND THE GREEN KEYCARD.";
+function shiftStr(s, k){ return s.replace(/[A-Z]/g, ch => String.fromCharCode((ch.charCodeAt(0)-65+k+26)%26+65)); }
+const CIPHERTEXT = shiftStr(PLAINTEXT, CIPHER_SHIFT);
+
+function openDecoder(){ S.mode = "decode"; S.shift = 0; renderControls(); }
+function renderDecoder(){
+  const prev = shiftStr(CIPHERTEXT, -S.shift);
+  $("controlArea").innerHTML = `<div class="overlay">
+    <div style="font-size:12px;color:var(--dim)">You twist your trusty Secret Decoder Ring against the glyphs...</div>
+    <div class="big">${prev}</div>
+    <div class="ringrow"><button class="k" onclick="ring(-1)">◀ shift</button><span class="ringval">${S.shift}</span><button class="k" onclick="ring(1)">shift ▶</button></div>
+    <div class="ov-btns"><button class="k" onclick="confirmDecode()">✓ Confirm [Enter]</button><button class="k" onclick="cancelMode()">✕ Stop [Esc]</button></div>
+    <div class="hint">⌨ <b>[</b> / <b>]</b> turn ring &nbsp;•&nbsp; <b>Enter</b> confirm &nbsp;•&nbsp; <b>Esc</b> cancel</div></div>`;
+}
+function ring(d){ S.shift = (S.shift + d + 26) % 26; renderDecoder(); }
+function confirmDecode(){
+  if (S.shift === CIPHER_SHIFT){
+    S.decoded = true;
+    const m = comp("OBELISK","obelisk"); if (m) m.done = true;
+    S.mode = "play";
+    log("The glyphs snap into focus:\n\"" + PLAINTEXT + "\"", "good");
+    log("Coolant Cell, Flux Coil, Green Keycard. Find all three, haul them to the transport, and let's go home.", "nav");
+    refresh();
+  } else {
+    log("You confirm... gibberish. The glyphs remain smug. Keep turning.", "bad");
+  }
+}
+
+/* ==========================================================
+   SECTION: PUZZLES — footlocker combo
+   ========================================================== */
+function openCombo(){ S.mode = "combo"; S.combo = ""; renderControls(); }
+function renderCombo(){
+  $("controlArea").innerHTML = `<div class="overlay">
+    <div style="font-size:12px;color:var(--dim)">The dial waits. (Post-it: "THE ANSWER. you know the one.")</div>
+    <div class="comboDisplay">${S.combo.replace(/./g,"●")||"&nbsp;"}</div>
+    <div class="ov-btns">${[1,2,3,4,5,6,7,8,9,0].map(n=>`<button class="k" onclick="comboKey('${n}')">${n}</button>`).join("")}<button class="k" onclick="comboBack()">⌫</button><button class="k" onclick="comboSubmit()">✓ Enter</button><button class="k" onclick="cancelMode()">✕ Esc</button></div>
+    <div class="hint">⌨ digits &nbsp;•&nbsp; <b>Backspace</b> &nbsp;•&nbsp; <b>Enter</b> &nbsp;•&nbsp; <b>Esc</b></div></div>`;
+}
+function comboKey(n){ if (S.combo.length < 4){ S.combo += n; renderCombo(); } }
+function comboBack(){ S.combo = S.combo.slice(0,-1); renderCombo(); }
+function comboSubmit(){
+  if (S.combo === LOCKER_CODE) unlockLocker("42 clicks home. The footlocker pops open.");
+  else { log("The dial spins back with a mocking *click*. Wrong combo.", "bad"); S.combo = ""; renderCombo(); }
+}
+function smashLocker(){
+  const r = S.inv.findIndex(i => i.id==="rock");
+  if (r > -1) S.inv.splice(r, 1);
+  unlockLocker("You introduce the suspiciously heavy rock to the footlocker. The lock loses; the rock, its purpose fulfilled, crumbles to gravel.");
+}
+function unlockLocker(intro){
+  S.mode = "play";
+  const m = comp("STATION","locker"); if (m) m.done = true;
+  H("STATION").comps.forEach(x => { if (x.hidden) x.hidden = false; });
+  log(intro + " Inside: a FLUX COIL in foam, slightly dented but functional. (Grab it.)", "good");
+  refresh();
+}
+
+/* ==========================================================
+   SECTION: NAV-COMP hints + win condition + doom clock
+   ========================================================== */
+function navComp(){
+  if (!S.decoded){
+    log("Find that black obelisk and decode it — the ring fancies the number seven. Then we'll know what the ship needs.", "nav");
+    return;
+  }
+  const miss = REQUIRED.filter(id => !has(id));
+  const N = { coolant_cell:"Coolant Cell", flux_coil:"Flux Coil", green_keycard:"Green Keycard" };
+  if (miss.length){
+    log("You still need: " + miss.map(m=>N[m]).join(", ") + ". The keycard's in that vending machine — but it needs power first (mind the red wire). Then haul everything to the transport.", "nav");
+  } else {
+    log("You've got all three parts. Get them to the TRANSPORT and launch.", "nav");
+  }
+  if (!S.hasRaft) log("If you fancy what's across the water: that's a death-swim. Find driftwood, vines, and something that floats, then lash a raft at the shore.", "nav");
+}
+
+function attemptEscape(){
+  if (!S.decoded){ log("You poke at the transport's controls and realize you've no idea what it needs. Decode the obelisk first.", "bad"); return; }
+  const miss = REQUIRED.filter(id => !has(id));
+  if (miss.length){ log("The transport's still missing parts. Can't hot-wire a starship with vibes. Go finish scavenging.", "bad"); return; }
+  S.over = true;
+  log("You slam the COOLANT CELL, FLUX COIL, and GREEN KEYCARD into place. The engine coughs, catches, ROARS, and you punch up through the canopy as the impending doom screeches in the distance.", "good");
+  log("Took you long enough.", "nav");
+  log("\n★ YOU ESCAPED. ★\n— END OF ITERATION 5 —", "good");
+  refresh();
+}
+
+function checkDoom(){
+  const f = S.turn / DOOM_LIMIT;
+  if (S.turn >= DOOM_LIMIT){
+    S.over = true;
+    log("The impending doom finally arrives. It is large, it is hungry, and it has opinions about trespassers. Nav-Comp's last words: 'I did try to tell them.'\n\n☠ GAME OVER. ☠", "bad");
+    refresh();
+    return;
+  }
+  const msgs = [
+    "Something enormous shifts deep in the forest. Probably nothing. Probably.",
+    "The trees lean the wrong way. The doom is closing in and you're dawdling.",
+    "RUN. Whatever's coming is nearly here.",
+  ];
+  for (let i = DOOM_WARN.length-1; i >= 0; i--){
+    if (f >= DOOM_WARN[i] && S.warned <= i){ S.warned = i+1; log(msgs[i], "bad"); break; }
+  }
+}
+
+/* ==========================================================
+   SECTION: INPUT
+   ========================================================== */
+document.addEventListener("keydown", e => {
+  if (S.over) return;
+  const k = e.key.toLowerCase();
+  if (S.mode === "decode"){
+    if (k === "[") { ring(-1); e.preventDefault(); }
+    else if (k === "]") { ring(1); e.preventDefault(); }
+    else if (k === "enter") { confirmDecode(); e.preventDefault(); }
+    else if (k === "escape") { cancelMode(); e.preventDefault(); }
+    return;
+  }
+  if (S.mode === "combo"){
+    if (/^[0-9]$/.test(k)) { comboKey(k); e.preventDefault(); }
+    else if (k === "backspace") { comboBack(); e.preventDefault(); }
+    else if (k === "enter") { comboSubmit(); e.preventDefault(); }
+    else if (k === "escape") { cancelMode(); e.preventDefault(); }
+    return;
+  }
+  if (S.mode === "choice"){
+    if (/^[1-9]$/.test(k)) { pickChoice(parseInt(k,10)-1); e.preventDefault(); }
+    else if (k === "escape") { cancelMode(); e.preventDefault(); }
+    return;
+  }
+  if (KEYDIR[k]) { move(KEYDIR[k]); e.preventDefault(); return; }
+  if (k === "h") { navComp(); return; }
+  if (/^[1-9]$/.test(k)) runAction(parseInt(k,10)-1);
+});
+
+/* ==========================================================
+   SECTION: INTRO CUTSCENE
+   ========================================================== */
+function buildIntroSVG(){
+  const W = 400, Ht = 200;
+  let s = `<svg viewBox="0 0 ${W} ${Ht}" xmlns="http://www.w3.org/2000/svg" id="introSvg">`;
+  s += `<defs><linearGradient id="introSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1a0a3a"/><stop offset="60%" stop-color="#0a0a18"/><stop offset="100%" stop-color="#05050d"/>
+        </linearGradient></defs>`;
+  s += `<rect x="0" y="0" width="${W}" height="${Ht}" fill="url(#introSky)"/>`;
+
+  const starRng = rng("introstars");
+  for (let i = 0; i < 26; i++){
+    const x = starRng()*W, y = starRng()*Ht*0.7, r = 0.6+starRng()*1.1, dl = (starRng()*3).toFixed(2);
+    s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#cfe8ff" class="twinkle" style="animation-delay:${dl}s"/>`;
+  }
+  // distant crescent moon
+  s += `<circle cx="${W-50}" cy="40" r="22" fill="#a96bff" opacity=".35"/><circle cx="${W-44}" cy="34" r="22" fill="#0a0a18"/>`;
+
+  // ground + treeline (reuses the same pine() doodle as the field chart)
+  s += `<rect x="0" y="${Ht-26}" width="${W}" height="26" fill="#0d2014"/>`;
+  for (let i = 0; i < 9; i++){
+    const x = 14 + i*46 + (i%2?10:0);
+    s += pine(x, Ht-24, 16+(i%3)*4, "#0a2818");
+  }
+
+  // smoke trail
+  s += `<g>`;
+  const smokePts = [[40,30,0.2],[70,48,0.5],[100,66,0.8],[128,84,1.1],[150,98,1.4],[168,108,1.7]];
+  smokePts.forEach(([sx,sy,delay]) => { s += `<circle cx="${sx}" cy="${sy}" r="9" fill="#9aa0b0" class="smokepuff" style="animation-delay:${delay}s"/>`; });
+  s += `</g>`;
+
+  // ship (outer group is CSS-animated for flight path; inner group holds a static
+  // rotation so the drawn shape points diagonally without fighting the CSS transform)
+  s += `<g id="introShipGroup" class="shipfly">
+          <g transform="rotate(35)">
+            <path d="M -16,0 L 10,-7 L 18,0 L 10,7 Z" fill="#cdd6e6"/>
+            <path d="M -16,0 L -26,-5 L -22,0 L -26,5 Z" fill="#ff8b6e" class="flame"/>
+            <circle cx="2" cy="0" r="3" fill="#22e0ff"/>
+            <path d="M 2,-7 L -4,-14 L 4,-9 Z" fill="#a9b4cc"/>
+            <path d="M 2,7 L -4,14 L 4,9 Z" fill="#a9b4cc"/>
+          </g>
+        </g>`;
+
+  // explosion (outer group holds the static crash-site position; inner group is
+  // CSS-animated for the scale/opacity pop, so the two transforms don't conflict)
+  s += `<g transform="translate(168,108)"><g id="introBoom" class="boom">
+          <circle r="22" fill="#ffb13d"/><circle r="12" fill="#ff5b6e"/>`;
+  [0,45,90,135,180,225,270,315].forEach(a => {
+    const rad = a*Math.PI/180, r1=24, r2=40;
+    const x1=(Math.cos(rad)*r1).toFixed(1), y1=(Math.sin(rad)*r1).toFixed(1);
+    const x2=(Math.cos(rad)*r2).toFixed(1), y2=(Math.sin(rad)*r2).toFixed(1);
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ffd98a" stroke-width="3" stroke-linecap="round"/>`;
+  });
+  s += `</g></g>`;
+
+  s += `</svg>`;
+  return s;
+}
+
+function skipIntro(){
+  $("cutsceneStage").style.display = "none";
+  $("storyPanel").style.display = "block";
+}
+
+function beginGame(){
+  $("introOverlay").style.display = "none";
+  $("gameWrap").style.display = "block";
+  initWorld();
+  boot();
+}
+
+function playIntro(){
+  $("cutsceneStage").innerHTML = buildIntroSVG();
+  $("cutsceneStage").addEventListener("animationend", e => {
+    if (e.animationName === "stageFadeOut") skipIntro();
+  });
+  $("storyText").innerHTML = `
+    <p class="sys">// SYSTEM ONLINE // emergency pod log, entry 1 //</p>
+    <p>You come to in the Crash Furrow — a generous word for "crater." Smoke still curls from the furrow your pod plowed into the loam. A rare patch of open sky. The Nav-Comp blinks from a Frisbee-sized hole in its casing.</p>
+    <p class="nav">Right, sport. The transport's somewhere out in these 61-odd patches of forest, something big is en route, and we don't yet know what the ship needs yet. I'm sketching the field chart as you go. Mind the water — it doesn't look swimmable.</p>
+  `;
+}
+
+/* ==========================================================
+   SECTION: BOOT / RESTART
+   ========================================================== */
+function refresh(){ renderMap(); renderStatus(); renderControls(); }
+
+function boot(){
+  H("FURROW").disc = true;
+  $("legend").innerHTML = "Map key: ▲ trees · ≈ water · ⌂ shelter · ⌐ ruins · ••• trail (fading = unmapped path) · ◉ you. Barriers: ▲ mountains &amp; 🌲 brush are crosshatched/impassable; 🧱 building walls are a single sealed door away from each other; rivers &amp; the lake show misty water — you can't see or swim across (build a raft).";
+  log("// SYSTEM ONLINE // emergency pod log, entry 1 //", "sys");
+  log("You come to in the " + H("FURROW").name + ", a generous word for 'crater.'\n" + H("FURROW").desc, "you");
+  log("Right, sport. The transport's somewhere out in these 61-odd patches of forest, something big is en route, and we don't yet know what the ship needs. I'm sketching the field chart as you go. Mind the water — it doesn't look swimmable. Press H for hints.", "nav");
+  refresh();
+}
+
+function restart(){
+  initWorld();
+  S = freshState();
+  $("log").innerHTML = "";
+  boot();
+}
+
+playIntro();
+</script>
