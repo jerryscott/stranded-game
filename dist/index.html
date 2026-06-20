@@ -30,7 +30,7 @@
   .tag{color:var(--neon-cyan);font-size:12px;letter-spacing:3px;margin-bottom:12px;text-transform:uppercase;text-shadow:0 0 6px var(--neon-cyan);}
 
   /* ---------- intro cutscene ---------- */
-  #introOverlay{max-width:560px;margin:0 auto;}
+  #introOverlay{max-width:672px;margin:0 auto;}
   .cutsceneStage{position:relative;border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 0 0 2px var(--line),0 8px 30px rgba(0,0,0,.5);
     animation:stageShake 3.6s ease, stageFadeOut 3.6s ease forwards;}
   .cutsceneStage svg{display:block;width:100%;height:auto;}
@@ -241,7 +241,7 @@ const SPECIAL = {
    comps:[{t:"man",id:"transport",name:"The Wrecked Transport",icon:"🚀",verb:"Install the parts and launch"}]},
  "-1,-0.5":{id:"SPRING",name:"The Spring",terrain:"water",env:"outdoor",light:"lit",
    desc:"A clear spring burbles over smooth stones in a shaft of sun. One stone is suspiciously, comically heavy.",
-   comps:[{t:"col",id:"spring_water",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,effects:{hydration:45,health:5},grab:"You drink deep. Cold, clean, faintly minty. (+45 hydration, +5 health)"},
+   comps:[{t:"col",id:"spring_water",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,renewable:true,effects:{hydration:45,health:5},grab:"You drink deep. Cold, clean, faintly minty. (+45 hydration, +5 health)"},
           {t:"col",id:"rock",name:"Suspiciously Heavy Rock",kind:"tool",icon:"🪨",grab:"You pocket the suspiciously heavy rock. It has the air of an object with One Job."}]},
  "1,-1.5":{id:"BUILD_GEN",name:"Generator Room",terrain:"indoor",env:"indoor",light:"dark",
    desc:"A cinderblock outbuilding, dark and dead. A grimy breaker panel dominates one wall. A faded stencil beside it reads: \"GREEN = genny start.  RED = LIVE MAINS — DO NOT TOUCH.\" There's exactly one door, and you're standing in it, facing the obelisk.",
@@ -265,6 +265,9 @@ const SPECIAL = {
  "2,1":{id:"LAKESHORE",name:"Lakeshore",terrain:"forest",env:"outdoor",light:"lit",
    desc:"A pebbled shore. Driftwood and pale reeds line the waterline.",
    comps:[{t:"col",id:"driftwood",name:"Bundle of Driftwood",kind:"mat",icon:"🪵",grab:"You gather a bundle of sun-bleached driftwood. (raft material)"}]},
+ "-3,-1.5":{id:"SPRING2",name:"Hidden Spring",terrain:"water",env:"outdoor",light:"lit",
+   desc:"A mossy cleft in the rock face seeps clear water into a shallow pool. Easy to miss — and easy to return to.",
+   comps:[{t:"col",id:"spring_water2",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,renewable:true,effects:{hydration:45,health:5},grab:"You drink from the hidden spring. Cold and clean. (+45 hydration, +5 health)"}]},
  "-2,-1":{id:"VINE_THICKET",name:"Vine Thicket",terrain:"dense",env:"outdoor",light:"dark",
    desc:"A wall of rubbery alien vines, thick as fire hoses.",
    comps:[{t:"col",id:"vines",name:"Coil of Tough Vines",kind:"mat",icon:"🪢",grab:"You hack free a long coil of tough, ropy vines. (raft material)"}]},
@@ -344,7 +347,7 @@ function buildLattice(){
         const t = r() < 0.16 ? "clearing" : (r() < 0.78 ? "forest" : "dense");
         const id = "H" + ("" + c).replace("-","m") + "_" + ("" + y).replace("-","m").replace(".","p");
         const comps = [];
-        if (r() < 0.2) comps.push(r() < 0.5 ? berries() : puddle());
+        if (r() < 0.15) comps.push(r() < 0.8 ? berries() : puddle());
         HEXES[id] = { id, name:gn[t], terrain:t, env:"outdoor", light:(t==="dense"?"dark":"lit"),
           disc:false, desc:gd[t][Math.floor(r()*3)%3], comps, pos:{x:c,y:y} };
         COORD2ID[key] = id;
@@ -872,7 +875,7 @@ function buildRaft(){
 function takeItem(c){
   applyEffect(c.effects);
   if (c.consumable){
-    c.taken = true;
+    if (!c.renewable) c.taken = true;
     log(c.grab, effectTone(c.effects));
   } else {
     c.taken = true;
@@ -1174,6 +1177,12 @@ function beginGame(){
 }
 
 function playIntro(){
+  document.addEventListener("keydown", function onIntroEnter(e){
+    if (e.key === "Enter" && $("storyPanel").style.display !== "none"){
+      document.removeEventListener("keydown", onIntroEnter);
+      beginGame();
+    }
+  });
   $("cutsceneStage").innerHTML = buildIntroSVG();
   $("cutsceneStage").addEventListener("animationend", e => {
     if (e.animationName === "stageFadeOut") skipIntro();

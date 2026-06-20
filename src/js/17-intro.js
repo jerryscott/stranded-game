@@ -71,6 +71,12 @@ function beginGame(){
 }
 
 function playIntro(){
+  document.addEventListener("keydown", function onIntroEnter(e){
+    if (e.key === "Enter" && $("storyPanel").style.display !== "none"){
+      document.removeEventListener("keydown", onIntroEnter);
+      beginGame();
+    }
+  });
   $("cutsceneStage").innerHTML = buildIntroSVG();
   $("cutsceneStage").addEventListener("animationend", e => {
     if (e.animationName === "stageFadeOut") skipIntro();

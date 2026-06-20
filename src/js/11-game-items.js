@@ -4,7 +4,7 @@
 function takeItem(c){
   applyEffect(c.effects);
   if (c.consumable){
-    c.taken = true;
+    if (!c.renewable) c.taken = true;
     log(c.grab, effectTone(c.effects));
   } else {
     c.taken = true;

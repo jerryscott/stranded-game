@@ -36,7 +36,7 @@ function buildLattice(){
         const t = r() < 0.16 ? "clearing" : (r() < 0.78 ? "forest" : "dense");
         const id = "H" + ("" + c).replace("-","m") + "_" + ("" + y).replace("-","m").replace(".","p");
         const comps = [];
-        if (r() < 0.2) comps.push(r() < 0.5 ? berries() : puddle());
+        if (r() < 0.15) comps.push(r() < 0.8 ? berries() : puddle());
         HEXES[id] = { id, name:gn[t], terrain:t, env:"outdoor", light:(t==="dense"?"dark":"lit"),
           disc:false, desc:gd[t][Math.floor(r()*3)%3], comps, pos:{x:c,y:y} };
         COORD2ID[key] = id;
