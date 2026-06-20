@@ -1,0 +1,98 @@
+<!--
+==================================================================
+  STRANDED! — early-'80s sci-fi dramedy.
+  ITERATION 5 — INTRO CUTSCENE + LAYOUT PASS
+==================================================================
+  CHANGE THIS PASS
+   - New intro cutscene (plays once, on first load only — NOT replayed
+     by restart()): a small hand-drawn SVG cartoon of the pod crashing
+     (stars, moon, alien treeline reusing the map's pine() doodle,
+     ship tumbling in with smoke + a burst + screen-shake), fading into
+     a story panel with the opening log entry + a "how to play" key
+     diagram + a Begin button. Click-to-skip available throughout.
+   - Location/terrain/env/light badges card moved out of the right
+     column and placed under the status strip in the (now two-card)
+     middle column, at the same narrow width.
+   - Directional movement PAD removed from the live Controls card.
+     Movement is keyboard-only now (Q W E / A S D); the existing hint
+     line at the bottom of Controls still documents this. Action
+     buttons (1-9) and the Hint button are unaffected.
+==================================================================
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+%%CSS%%
+</style>
+
+<h1>STRANDED!</h1>
+<div class="tag">a nostalgic sci-fi dramedy &nbsp;•&nbsp; iteration 5 &nbsp;•&nbsp; 61 hexes</div>
+
+<div id="introOverlay">
+  <div class="cutsceneStage" id="cutsceneStage" onclick="skipIntro()">
+    <button class="skipBtn" onclick="skipIntro()">Skip ▶</button>
+  </div>
+  <div class="storyPanel" id="storyPanel" style="display:none;">
+    <h2>EMERGENCY POD LOG — ENTRY 1</h2>
+    <div class="storyText" id="storyText"></div>
+    <div class="howto">
+      <h3>How to Play</h3>
+      <div class="keyrow">
+        <div class="keytrio"><kbd>Q</kbd><span>NW</span></div>
+        <div class="keytrio"><kbd>W</kbd><span>N</span></div>
+        <div class="keytrio"><kbd>E</kbd><span>NE</span></div>
+      </div>
+      <div class="keyrow">
+        <div class="keytrio"><kbd>A</kbd><span>SW</span></div>
+        <div class="keytrio"><kbd>S</kbd><span>S</span></div>
+        <div class="keytrio"><kbd>D</kbd><span>SE</span></div>
+      </div>
+      <p>Those six keys move you one hex at a time — laid out to match the directions above.</p>
+      <p>Press <kbd>1</kbd>–<kbd>9</kbd> for whatever's available at your current location (take items, try locks, pull levers...).</p>
+      <p>Press <kbd>H</kbd> any time to ask the Nav-Comp for a hint.</p>
+    </div>
+    <button class="k beginBtn" onclick="beginGame()">▶ Begin Transmission</button>
+  </div>
+</div>
+
+<div id="gameWrap" style="display:none;">
+  <div class="wrap">
+    <div class="col-left"><div class="card"><h2>Field Chart</h2><div id="map"></div><div class="legend" id="legend"></div></div></div>
+
+    <div class="col-mid">
+      <div class="card statuscard">
+        <h2>Status</h2>
+        <div class="statuscol">
+          <div class="doomcol">
+            <div class="doomtrack"><div class="doomfill" id="doomBar"></div></div>
+            <div class="doomlabel"><b id="doomTxt">0%</b>DOOM</div>
+          </div>
+          <div class="vgrid" id="vgrid"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="locLine">Location: <span class="loc" id="locName">—</span></div>
+        <div class="badgeRow">
+          <span class="badge" id="terrBadge">—</span>
+          <span class="badge" id="envBadge">—</span>
+          <span class="badge" id="lightBadge">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="card"><h2>Transmission Log</h2><div id="log"></div></div>
+      <div class="card">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:6px;">INVENTORY</div>
+        <div class="inv" id="inv"></div>
+      </div>
+      <div class="card"><h2>Controls</h2><div id="controlArea"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+%%JS%%
+</script>
