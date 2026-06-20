@@ -30,7 +30,7 @@
   .tag{color:var(--neon-cyan);font-size:12px;letter-spacing:3px;margin-bottom:12px;text-transform:uppercase;text-shadow:0 0 6px var(--neon-cyan);}
 
   /* ---------- intro cutscene ---------- */
-  #introOverlay{max-width:840px;margin:0 auto;}
+  #introOverlay{max-width:560px;margin:0 auto;}
   .cutsceneStage{position:relative;border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 0 0 2px var(--line),0 8px 30px rgba(0,0,0,.5);
     animation:stageShake 3.6s ease, stageFadeOut 3.6s ease forwards;}
   .cutsceneStage svg{display:block;width:100%;height:auto;}
@@ -124,7 +124,6 @@
   .legend{font-size:10px;color:var(--dim);margin-top:8px;line-height:1.6;}
   .restartBtn{width:100%;margin-top:10px;}
   @media(max-width:680px){#log{height:170px} .statuscol{height:220px;} .col-mid{flex:1 1 100%;max-width:100%;}}
-
 </style>
 
 <h1>STRANDED!</h1>
@@ -209,7 +208,6 @@ const DEHYDRATION_DMG = 10, LOW_WARN = 25;
 const REQUIRED = ["coolant_cell", "flux_coil", "green_keycard"];
 const RAFT_MAT = ["driftwood", "vines", "floatfoam"];
 
-
 /* ==========================================================
    SECTION: DATA  (terrain, directions, map content)
    ========================================================== */
@@ -241,7 +239,7 @@ const SPECIAL = {
    comps:[{t:"man",id:"transport",name:"The Wrecked Transport",icon:"🚀",verb:"Install the parts and launch"}]},
  "-1,-0.5":{id:"SPRING",name:"The Spring",terrain:"water",env:"outdoor",light:"lit",
    desc:"A clear spring burbles over smooth stones in a shaft of sun. One stone is suspiciously, comically heavy.",
-   comps:[{t:"col",id:"spring_water",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,renewable:true,effects:{hydration:45,health:5},grab:"You drink deep. Cold, clean, faintly minty. (+45 hydration, +5 health)"},
+   comps:[{t:"col",id:"spring_water",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,effects:{hydration:45,health:5},grab:"You drink deep. Cold, clean, faintly minty. (+45 hydration, +5 health)"},
           {t:"col",id:"rock",name:"Suspiciously Heavy Rock",kind:"tool",icon:"🪨",grab:"You pocket the suspiciously heavy rock. It has the air of an object with One Job."}]},
  "1,-1.5":{id:"BUILD_GEN",name:"Generator Room",terrain:"indoor",env:"indoor",light:"dark",
    desc:"A cinderblock outbuilding, dark and dead. A grimy breaker panel dominates one wall. A faded stencil beside it reads: \"GREEN = genny start.  RED = LIVE MAINS — DO NOT TOUCH.\" There's exactly one door, and you're standing in it, facing the obelisk.",
@@ -265,9 +263,6 @@ const SPECIAL = {
  "2,1":{id:"LAKESHORE",name:"Lakeshore",terrain:"forest",env:"outdoor",light:"lit",
    desc:"A pebbled shore. Driftwood and pale reeds line the waterline.",
    comps:[{t:"col",id:"driftwood",name:"Bundle of Driftwood",kind:"mat",icon:"🪵",grab:"You gather a bundle of sun-bleached driftwood. (raft material)"}]},
- "-3,-1.5":{id:"SPRING2",name:"Hidden Spring",terrain:"water",env:"outdoor",light:"lit",
-   desc:"A mossy cleft in the rock face seeps clear water into a shallow pool. Easy to miss — and easy to return to.",
-   comps:[{t:"col",id:"spring_water2",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,renewable:true,effects:{hydration:45,health:5},grab:"You drink from the hidden spring. Cold and clean. (+45 hydration, +5 health)"}]},
  "-2,-1":{id:"VINE_THICKET",name:"Vine Thicket",terrain:"dense",env:"outdoor",light:"dark",
    desc:"A wall of rubbery alien vines, thick as fire hoses.",
    comps:[{t:"col",id:"vines",name:"Coil of Tough Vines",kind:"mat",icon:"🪢",grab:"You hack free a long coil of tough, ropy vines. (raft material)"}]},
@@ -308,7 +303,6 @@ const BUILDINGS = [
   { hexes:["BUILD_GEN","BUILD_BREAK"], entrances:[{hex:"BUILD_GEN", dir:"SW"}] }
 ];
 
-
 /* ==========================================================
    SECTION: WORLD BUILD
    (Deterministic + re-runnable, so restart() can call this again
@@ -347,7 +341,7 @@ function buildLattice(){
         const t = r() < 0.16 ? "clearing" : (r() < 0.78 ? "forest" : "dense");
         const id = "H" + ("" + c).replace("-","m") + "_" + ("" + y).replace("-","m").replace(".","p");
         const comps = [];
-        if (r() < 0.15) comps.push(r() < 0.8 ? berries() : puddle());
+        if (r() < 0.2) comps.push(r() < 0.5 ? berries() : puddle());
         HEXES[id] = { id, name:gn[t], terrain:t, env:"outdoor", light:(t==="dense"?"dark":"lit"),
           disc:false, desc:gd[t][Math.floor(r()*3)%3], comps, pos:{x:c,y:y} };
         COORD2ID[key] = id;
@@ -385,7 +379,6 @@ function initWorld(){
   applyBuildingWalls();
 }
 
-
 /* ==========================================================
    SECTION: STATE
    ========================================================== */
@@ -400,7 +393,6 @@ function freshState(){
   };
 }
 let S = freshState();
-
 
 /* ==========================================================
    SECTION: HELPERS  (pure, no rendering)
@@ -445,7 +437,6 @@ function effectTone(eff){
   if (net < 0) return "bad";
   return "ev";
 }
-
 
 /* ==========================================================
    SECTION: RENDER — MAP
@@ -645,7 +636,6 @@ function renderMap(){
   $("map").innerHTML = g;
 }
 
-
 /* ==========================================================
    SECTION: RENDER — STATUS (status strip: doom + six meters; inventory)
    ========================================================== */
@@ -693,7 +683,6 @@ function renderStatus(){
     inv.innerHTML = S.inv.map(i => `<span class="item ${i.kind==='part'?'part':i.kind==='mat'?'mat':i.kind==='tool'?'tool':''}">${i.icon||""} ${i.name}</span>`).join("");
   }
 }
-
 
 /* ==========================================================
    SECTION: RENDER — CONTROLS  (movement pad removed; keyboard-only moves)
@@ -750,7 +739,6 @@ function renderChoice(){
 function pickChoice(i){ const ch = S.choice; if (ch && ch.options[i]) ch.options[i].fn(); }
 function cancelMode(){ S.mode = "play"; S.choice = null; renderControls(); }
 
-
 /* ==========================================================
    SECTION: GAME LOGIC — vitals
    ========================================================== */
@@ -773,7 +761,6 @@ function checkVitals(){
   else if (S.hydration > LOW_WARN) S._hydW = false;
   return false;
 }
-
 
 /* ==========================================================
    SECTION: GAME LOGIC — movement
@@ -868,14 +855,13 @@ function buildRaft(){
   refresh();
 }
 
-
 /* ==========================================================
    SECTION: GAME LOGIC — items & manipulables
    ========================================================== */
 function takeItem(c){
   applyEffect(c.effects);
   if (c.consumable){
-    if (!c.renewable) c.taken = true;
+    c.taken = true;
     log(c.grab, effectTone(c.effects));
   } else {
     c.taken = true;
@@ -933,7 +919,6 @@ function doManipulable(c){
 }
 function runAction(i){ const a = (S._acts||[])[i]; if (a) a.fn(); }
 
-
 /* ==========================================================
    SECTION: GAME LOGIC — power-switch curiosity trap
    ========================================================== */
@@ -960,7 +945,6 @@ function electrocute(){
   log("You grab the red wire. The red wire grabs back. There is a flash, a smell like burnt pennies and regret, and the Nav-Comp logging 'told you so' as the lights go out for good.\n\n☠ GAME OVER — electrocuted. ☠", "bad");
   refresh();
 }
-
 
 /* ==========================================================
    SECTION: PUZZLES — decoder ring
@@ -993,7 +977,6 @@ function confirmDecode(){
   }
 }
 
-
 /* ==========================================================
    SECTION: PUZZLES — footlocker combo
    ========================================================== */
@@ -1023,7 +1006,6 @@ function unlockLocker(intro){
   log(intro + " Inside: a FLUX COIL in foam, slightly dented but functional. (Grab it.)", "good");
   refresh();
 }
-
 
 /* ==========================================================
    SECTION: NAV-COMP hints + win condition + doom clock
@@ -1072,7 +1054,6 @@ function checkDoom(){
   }
 }
 
-
 /* ==========================================================
    SECTION: INPUT
    ========================================================== */
@@ -1102,7 +1083,6 @@ document.addEventListener("keydown", e => {
   if (k === "h") { navComp(); return; }
   if (/^[1-9]$/.test(k)) runAction(parseInt(k,10)-1);
 });
-
 
 /* ==========================================================
    SECTION: INTRO CUTSCENE
@@ -1177,12 +1157,6 @@ function beginGame(){
 }
 
 function playIntro(){
-  document.addEventListener("keydown", function onIntroEnter(e){
-    if (e.key === "Enter" && $("storyPanel").style.display !== "none"){
-      document.removeEventListener("keydown", onIntroEnter);
-      beginGame();
-    }
-  });
   $("cutsceneStage").innerHTML = buildIntroSVG();
   $("cutsceneStage").addEventListener("animationend", e => {
     if (e.animationName === "stageFadeOut") skipIntro();
@@ -1193,7 +1167,6 @@ function playIntro(){
     <p class="nav">Right, sport. The transport's somewhere out in these 61-odd patches of forest, something big is en route, and we don't yet know what the ship needs yet. I'm sketching the field chart as you go. Mind the water — it doesn't look swimmable.</p>
   `;
 }
-
 
 /* ==========================================================
    SECTION: BOOT / RESTART
@@ -1217,5 +1190,4 @@ function restart(){
 }
 
 playIntro();
-
 </script>
