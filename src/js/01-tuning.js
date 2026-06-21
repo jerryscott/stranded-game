@@ -9,4 +9,4 @@ const DOOM_LIMIT = 150, DOOM_WARN = [0.5, 0.75, 0.9];
 const CIPHER_SHIFT = 7, LOCKER_CODE = "42";
 const DEHYDRATION_DMG = 10, LOW_WARN = 25;
 const REQUIRED = ["coolant_cell", "flux_coil", "green_keycard"];
-const RAFT_MAT = ["driftwood", "vines", "floatfoam"];
+const RAFT_MAT = ["driftwood", "vines", "dopehtesu"];

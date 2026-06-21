@@ -20,7 +20,7 @@ function buildActions(){
     }
   });
   if (!S.hasRaft && nextToWater(S.cur) && RAFT_MAT.every(has)){
-    acts.push({ label:"Lash the driftwood, vines & foam into a raft", fn: buildRaft });
+    acts.push({ label:"Lash the driftwood, vines & Dopehtesu pods into a raft", fn: buildRaft });
   }
   return acts;
 }

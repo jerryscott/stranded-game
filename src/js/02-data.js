@@ -42,7 +42,6 @@ const SPECIAL = {
  "1,1.5":{id:"HATCH",name:"Cargo Hatch",terrain:"indoor",env:"indoor",light:"lit",
    desc:"A chunk of your pod's cargo section, hatch jammed shut, emergency lighting flickering inside.",
    comps:[{t:"man",id:"hatch",name:"Jammed Cargo Hatch",icon:"🚪",verb:"Override the hatch lock"},
-          {t:"col",id:"floatfoam",name:"Foam Crash-Padding",kind:"mat",icon:"🛟",grab:"You strip out a slab of buoyant foam crash-padding. Floats like a dream. (raft material)"},
           {t:"col",id:"coolant_cell",name:"Coolant Cell",kind:"part",icon:"🧊",required:true,hidden:true,grab:"You unstrap the COOLANT CELL from the bulkhead. (repair part)"},
           {t:"col",id:"phaser",name:"\"Phaser\" (label maker)",kind:"weapon",icon:"🔫",hidden:true,grab:"You claim the sleek 'phaser.' It's a label maker. It prints PEW."}]},
  "-2,1":{id:"STATION",name:"Ranger Station",terrain:"indoor",env:"indoor",light:"lit",
@@ -51,18 +50,20 @@ const SPECIAL = {
           {t:"col",id:"puffs",name:"Family-Size Cheese Puffs",kind:"food",icon:"🧀",consumable:true,effects:{health:8},grab:"You demolish a bag of radioactively orange cheese puffs. (+8 health)"},
           {t:"col",id:"flux_coil",name:"Flux Coil",kind:"part",icon:"🌀",required:true,hidden:true,grab:"You lift the FLUX COIL from its foam nest. (repair part)"}]},
  "2,1":{id:"LAKESHORE",name:"Lakeshore",terrain:"forest",env:"outdoor",light:"lit",
-   desc:"A pebbled shore. Driftwood and pale reeds line the waterline.",
-   comps:[{t:"col",id:"driftwood",name:"Bundle of Driftwood",kind:"mat",icon:"🪵",grab:"You gather a bundle of sun-bleached driftwood. (raft material)"}]},
+   desc:"A pebbled shore. Driftwood lines the waterline. A cluster of alien plants crowds the bank — enormous waxy pods, each the size of a pillow.",
+   comps:[{t:"col",id:"driftwood",name:"Bundle of Driftwood",kind:"mat",icon:"🪵",grab:"You gather a bundle of sun-bleached driftwood. (raft material)"},
+          {t:"col",id:"dopehtesu",name:"Dopehtesu Pods",kind:"mat",icon:"🌿",grab:"You harvest a cluster of Dopehtesu pods — huge, waxy, absurdly buoyant. The locals (if there were any) would probably have a name for them. (raft material)"}]},
  "-3,-1.5":{id:"SPRING2",name:"Hidden Spring",terrain:"water",env:"outdoor",light:"lit",
    desc:"A mossy cleft in the rock face seeps clear water into a shallow pool. Easy to miss — and easy to return to.",
    comps:[{t:"col",id:"spring_water2",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,renewable:true,effects:{hydration:45,health:5},grab:"You drink from the hidden spring. Cold and clean. (+45 hydration, +5 health)"}]},
  "-2,-1":{id:"VINE_THICKET",name:"Vine Thicket",terrain:"dense",env:"outdoor",light:"dark",
    desc:"A wall of rubbery alien vines, thick as fire hoses.",
    comps:[{t:"col",id:"vines",name:"Coil of Tough Vines",kind:"mat",icon:"🪢",grab:"You hack free a long coil of tough, ropy vines. (raft material)"}]},
- "3,0.5":{id:"LAKE",name:"The Lake",terrain:"lake",env:"outdoor",light:"lit",
-   desc:"You are out on the misty lake, riding low on your raft. The far shore resolves out of the fog.",
-   comps:[{t:"col",id:"lake_water",name:"Lake Water",kind:"water",icon:"🌊",consumable:true,effects:{hydration:30,health:-6},grab:"You scoop lake water over the side. Brackish, with a hint of ozone. (+30 hydration, -6 health)"}]},
- "4,1":{id:"DRONE",name:"Crashed Survey Drone",terrain:"ruin",env:"outdoor",light:"lit",
+ "2,0":{id:"LAKE",name:"The Lake",terrain:"lake",env:"outdoor",light:"lit",
+   desc:"You are out on the misty lake, riding low on your raft. Something waterlogged bobs against the hull.",
+   comps:[{t:"col",id:"lake_water",name:"Lake Water",kind:"water",icon:"🌊",consumable:true,effects:{hydration:30,health:-6},grab:"You scoop lake water over the side. Brackish, with a hint of ozone. (+30 hydration, -6 health)"},
+          {t:"col",id:"repair_manual",name:"Ship Repair Manual",kind:"part",icon:"📖",grab:"You fish out a waterlogged but readable SHIP REPAIR MANUAL. It lists what the transport needs: Coolant Cell, Flux Coil, Green Keycard. Now you know. (required reading)"}]},
+ "3,0.5":{id:"DRONE",name:"Crashed Survey Drone",terrain:"ruin",env:"outdoor",light:"lit",
    desc:"On the far shore, a crashed survey drone lies half-buried, panels splayed like a dead beetle.",
    comps:[{t:"man",id:"drone",name:"Drone Memory Core",icon:"📡",verb:"Read the drone's last log"},
           {t:"col",id:"ration",name:"Emergency Ration Cache",kind:"food",icon:"🥫",consumable:true,effects:{health:20,hydration:15},grab:"You crack the drone's ration cache. Actual edible food and a sealed canteen. (+20 health, +15 hydration)"}]},
@@ -81,11 +82,9 @@ const SPECIAL = {
 
 /* Natural barriers (rivers, mountains, thicket) — undirected, by coord-key */
 const BLOCKED = [
-  {a:"3,1.5",b:"2,1",type:"river"}, {a:"3,1.5",b:"2,2",type:"river"},
-  {a:"3,2.5",b:"2,2",type:"river"}, {a:"3,2.5",b:"2,3",type:"river"}, {a:"4,1",b:"4,0",type:"river"},
   {a:"-1,-1.5",b:"-2,-1",type:"mountains"}, {a:"-1,-1.5",b:"-2,-2",type:"mountains"}, {a:"-1,-2.5",b:"-2,-2",type:"mountains"},
   {a:"1,2.5",b:"0,2",type:"thicket"}, {a:"1,2.5",b:"0,3",type:"thicket"},
-];
+]; // lake water barriers are implicit: barrierKind() returns "water" for any lake-terrain neighbor
 
 /* Man-made buildings: a building is a set of hex IDs plus an explicit list
    of entrances ({hex, dir}). Every OTHER edge from a building hex to a

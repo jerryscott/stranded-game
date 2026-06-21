@@ -1,7 +1,7 @@
 /* ==========================================================
    SECTION: PUZZLES — decoder ring
    ========================================================== */
-const PLAINTEXT = "BRING THE COOLANT CELL, THE FLUX COIL, AND THE GREEN KEYCARD.";
+const PLAINTEXT = "THE WISE EXPLORER DOES NOT DROWN TRYING TO SWIM. INSTEAD, THEY USE THE POD.";
 function shiftStr(s, k){ return s.replace(/[A-Z]/g, ch => String.fromCharCode((ch.charCodeAt(0)-65+k+26)%26+65)); }
 const CIPHERTEXT = shiftStr(PLAINTEXT, CIPHER_SHIFT);
 
@@ -22,7 +22,7 @@ function confirmDecode(){
     const m = comp("OBELISK","obelisk"); if (m) m.done = true;
     S.mode = "play";
     log("The glyphs snap into focus:\n\"" + PLAINTEXT + "\"", "good");
-    log("Coolant Cell, Flux Coil, Green Keycard. Find all three, haul them to the transport, and let's go home.", "nav");
+    log("The pod. Something buoyant grows in these alien wilds — find it, build a raft, cross the water. The transport is out there.", "nav");
     refresh();
   } else {
     log("You confirm... gibberish. The glyphs remain smug. Keep turning.", "bad");
