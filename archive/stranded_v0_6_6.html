@@ -294,11 +294,6 @@ const SPECIAL = {
 
 /* Natural barriers (rivers, mountains, thicket) — undirected, by coord-key */
 const BLOCKED = [
-  // River: flows in from the east, rings the DRONE's islet and merges into the
-  // lake, then drains out to the southwest. Leaves the drone reachable only by raft.
-  {a:"3,-0.5",b:"3,0.5",type:"river"}, {a:"4,0",b:"3,0.5",type:"river"}, {a:"4,1",b:"3,0.5",type:"river"},
-  {a:"3,1.5",b:"3,0.5",type:"river"}, {a:"2,1",b:"3,0.5",type:"river"},
-  {a:"1,0.5",b:"0,1",type:"river"}, {a:"0,1",b:"-1,1.5",type:"river"},
   {a:"-1,-1.5",b:"-2,-1",type:"mountains"}, {a:"-1,-1.5",b:"-2,-2",type:"mountains"}, {a:"-1,-2.5",b:"-2,-2",type:"mountains"},
   {a:"1,2.5",b:"0,2",type:"thicket"}, {a:"1,2.5",b:"0,3",type:"thicket"},
 ]; // lake water barriers are implicit: barrierKind() returns "water" for any lake-terrain neighbor
