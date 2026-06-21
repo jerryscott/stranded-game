@@ -63,18 +63,34 @@ function skipIntro(){
   $("storyPanel").style.display = "block";
 }
 
-function beginGame(){
+function beginGame(debug){
+  S.nodeath = !!debug;
   $("introOverlay").style.display = "none";
   $("gameWrap").style.display = "block";
   initWorld();
   boot();
+  if (S.nodeath){
+    log("// DEBUG MODE ENGAGED — invincibility ON. Nothing can kill you. //", "sys");
+    log("Loss conditions (disabled, shown for reference): (1) HEALTH hits 0, (2) drowning — entering deep water without a raft, (3) the impending-doom clock reaching 100%. If one trips you'll get a [DEBUG] notice in the log instead of dying.", "nav");
+  }
 }
 
 function playIntro(){
+  let cmdBuf = "";
   document.addEventListener("keydown", function onIntroEnter(e){
-    if (e.key === "Enter" && $("storyPanel").style.display !== "none"){
+    if ($("storyPanel").style.display === "none") return;
+    if (e.key === "Enter"){
       document.removeEventListener("keydown", onIntroEnter);
-      beginGame();
+      beginGame(false);
+      return;
+    }
+    // Type "/d" (instead of Enter) to start in no-death debug mode.
+    if (DEBUG_MODES_ENABLED && e.key.length === 1){
+      cmdBuf = (cmdBuf + e.key).slice(-2);
+      if (cmdBuf === "/d"){
+        document.removeEventListener("keydown", onIntroEnter);
+        beginGame(true);
+      }
     }
   });
   $("cutsceneStage").innerHTML = buildIntroSVG();

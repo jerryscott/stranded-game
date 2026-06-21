@@ -208,7 +208,6 @@ const CIPHER_SHIFT = 7, LOCKER_CODE = "42";
 const DEHYDRATION_DMG = 10, LOW_WARN = 25;
 const REQUIRED = ["coolant_cell", "flux_coil", "green_keycard"];
 const RAFT_MAT = ["driftwood", "vines", "dopehtesu"];
-const DEBUG_MODES_ENABLED = true;  // master toggle for the "/d" no-death start command. Set false in release builds to disable it.
 
 
 /* ==========================================================
@@ -252,7 +251,7 @@ const SPECIAL = {
    comps:[{t:"col",id:"cola",name:"Warm TAB-ish Cola",kind:"water",icon:"🥤",consumable:true,effects:{hydration:20,health:-3},grab:"You crack a warm, flat, vaguely radioactive cola. (+20 hydration, -3 health)"},
           {t:"man",id:"vendor",name:"Vending Machine",icon:"📟",verb:"Use the vending machine"},
           {t:"col",id:"green_keycard",name:"Green Keycard",kind:"part",icon:"💳",required:true,hidden:true,grab:"You pluck the glowing GREEN KEYCARD from the tray. (repair part)"}]},
- "0,2":{id:"HATCH",name:"Cargo Hatch",terrain:"indoor",env:"indoor",light:"lit",
+ "1,1.5":{id:"HATCH",name:"Cargo Hatch",terrain:"indoor",env:"indoor",light:"lit",
    desc:"A chunk of your pod's cargo section, hatch jammed shut, emergency lighting flickering inside.",
    comps:[{t:"man",id:"hatch",name:"Jammed Cargo Hatch",icon:"🚪",verb:"Override the hatch lock"},
           {t:"col",id:"coolant_cell",name:"Coolant Cell",kind:"part",icon:"🧊",required:true,hidden:true,grab:"You unstrap the COOLANT CELL from the bulkhead. (repair part)"},
@@ -262,7 +261,7 @@ const SPECIAL = {
    comps:[{t:"man",id:"locker",name:"Locked Footlocker",icon:"🧰",verb:"the footlocker"},
           {t:"col",id:"puffs",name:"Family-Size Cheese Puffs",kind:"food",icon:"🧀",consumable:true,effects:{health:8},grab:"You demolish a bag of radioactively orange cheese puffs. (+8 health)"},
           {t:"col",id:"flux_coil",name:"Flux Coil",kind:"part",icon:"🌀",required:true,hidden:true,grab:"You lift the FLUX COIL from its foam nest. (repair part)"}]},
- "1,-0.5":{id:"LAKESHORE",name:"Lakeshore",terrain:"forest",env:"outdoor",light:"lit",
+ "2,1":{id:"LAKESHORE",name:"Lakeshore",terrain:"forest",env:"outdoor",light:"lit",
    desc:"A pebbled shore. Driftwood lines the waterline. A cluster of alien plants crowds the bank — enormous waxy pods, each the size of a pillow.",
    comps:[{t:"col",id:"driftwood",name:"Bundle of Driftwood",kind:"mat",icon:"🪵",grab:"You gather a bundle of sun-bleached driftwood. (raft material)"},
           {t:"col",id:"dopehtesu",name:"Dopehtesu Pods",kind:"mat",icon:"🌿",grab:"You harvest a cluster of Dopehtesu pods — huge, waxy, absurdly buoyant. The locals (if there were any) would probably have a name for them. (raft material)"}]},
@@ -276,7 +275,7 @@ const SPECIAL = {
    desc:"You are out on the misty lake, riding low on your raft. Something waterlogged bobs against the hull.",
    comps:[{t:"col",id:"lake_water",name:"Lake Water",kind:"water",icon:"🌊",consumable:true,effects:{hydration:30,health:-6},grab:"You scoop lake water over the side. Brackish, with a hint of ozone. (+30 hydration, -6 health)"},
           {t:"col",id:"repair_manual",name:"Ship Repair Manual",kind:"part",icon:"📖",grab:"You fish out a waterlogged but readable SHIP REPAIR MANUAL. It lists what the transport needs: Coolant Cell, Flux Coil, Green Keycard. Now you know. (required reading)"}]},
- "2,2":{id:"DRONE",name:"Crashed Survey Drone",terrain:"ruin",env:"outdoor",light:"lit",
+ "3,0.5":{id:"DRONE",name:"Crashed Survey Drone",terrain:"ruin",env:"outdoor",light:"lit",
    desc:"On the far shore, a crashed survey drone lies half-buried, panels splayed like a dead beetle.",
    comps:[{t:"man",id:"drone",name:"Drone Memory Core",icon:"📡",verb:"Read the drone's last log"},
           {t:"col",id:"ration",name:"Emergency Ration Cache",kind:"food",icon:"🥫",consumable:true,effects:{health:20,hydration:15},grab:"You crack the drone's ration cache. Actual edible food and a sealed canteen. (+20 health, +15 hydration)"}]},
@@ -295,17 +294,13 @@ const SPECIAL = {
 
 /* Natural barriers (rivers, mountains, thicket) — undirected, by coord-key */
 const BLOCKED = [
-  // River: flows in from the east (4,0 -> 3,0.5), through the lake, then drains
-  // southwest (1,0.5 -> 0,1) with a south arm down col 1 (1,1.5 -> 1,2.5 -> 1,3.5).
-  // Seals a southern pocket so the DRONE (2,2) is reachable only by raft; all raft
-  // materials live NORTH of the river. Verified winnable by lattice BFS.
-  {a:"4,0",b:"4,1",type:"river"}, {a:"3,0.5",b:"4,1",type:"river"}, {a:"3,0.5",b:"3,1.5",type:"river"},
-  {a:"2,1",b:"3,0.5",type:"river"}, {a:"1,0.5",b:"2,1",type:"river"}, {a:"1,1.5",b:"2,1",type:"river"},
-  {a:"1,1.5",b:"2,2",type:"river"}, {a:"1,2.5",b:"2,2",type:"river"}, {a:"1,2.5",b:"2,3",type:"river"},
-  {a:"1,3.5",b:"2,3",type:"river"},
+  // River: flows in from the east, rings the DRONE's islet and merges into the
+  // lake, then drains out to the southwest. Leaves the drone reachable only by raft.
+  {a:"3,-0.5",b:"3,0.5",type:"river"}, {a:"4,0",b:"3,0.5",type:"river"}, {a:"4,1",b:"3,0.5",type:"river"},
+  {a:"3,1.5",b:"3,0.5",type:"river"}, {a:"2,1",b:"3,0.5",type:"river"},
   {a:"1,0.5",b:"0,1",type:"river"}, {a:"0,1",b:"-1,1.5",type:"river"},
   {a:"-1,-1.5",b:"-2,-1",type:"mountains"}, {a:"-1,-1.5",b:"-2,-2",type:"mountains"}, {a:"-1,-2.5",b:"-2,-2",type:"mountains"},
-  {a:"1,2.5",b:"0,3",type:"thicket"},
+  {a:"1,2.5",b:"0,2",type:"thicket"}, {a:"1,2.5",b:"0,3",type:"thicket"},
 ]; // lake water barriers are implicit: barrierKind() returns "water" for any lake-terrain neighbor
 
 /* Man-made buildings: a building is a set of hex IDs plus an explicit list
@@ -401,7 +396,7 @@ function initWorld(){
 function freshState(){
   return {
     cur:"FURROW", turn:0, mode:"play",
-    decoded:false, power:false, hasRaft:false, nodeath:false,
+    decoded:false, power:false, hasRaft:false,
     shift:0, combo:"", choice:null,
     warned:0, over:false,
     inv:[], health:100, hydration:100,
@@ -771,15 +766,10 @@ function applyEffect(eff){
 
 function checkVitals(){
   if (S.health <= 0 && !S.over){
-    if (S.nodeath){
-      S.health = 1;
-      log("[DEBUG] LOSS CONDITION: your HEALTH hit 0 — normally GAME OVER. (invincible: clinging to 1 HP)", "bad");
-    } else {
-      S.over = true;
-      log("You sink to the alien dirt and decline to get back up. Nav-Comp's final entry: 'Vitals: nope.'\n\n☠ GAME OVER. ☠", "bad");
-      refresh();
-      return true;
-    }
+    S.over = true;
+    log("You sink to the alien dirt and decline to get back up. Nav-Comp's final entry: 'Vitals: nope.'\n\n☠ GAME OVER. ☠", "bad");
+    refresh();
+    return true;
   }
   if (S.health <= LOW_WARN && !S._hpW){ S._hpW = true; log("You're in rough shape. Find something restorative before you keel over.", "bad"); }
   else if (S.health > LOW_WARN) S._hpW = false;
@@ -865,13 +855,7 @@ function openSwimChoice(dir){
   renderControls();
 }
 function swimDeath(w){
-  S.mode = "play";
-  if (S.nodeath){
-    log("[DEBUG] LOSS CONDITION: you swam into the deep " + w + " without a raft — normally GAME OVER by drowning. (invincible: you splash back to shore)", "bad");
-    refresh();
-    return;
-  }
-  S.over = true;
+  S.over = true; S.mode = "play";
   const ends = [
     "You wade in. Three strokes out, something with far too many eyes wraps around your ankle and pulls. The mist closes over the ripples.",
     "You strike out for the far shore. The current has other plans, and so, apparently, does the thing living in it.",
@@ -1081,10 +1065,6 @@ function attemptEscape(){
 function checkDoom(){
   const f = S.turn / DOOM_LIMIT;
   if (S.turn >= DOOM_LIMIT){
-    if (S.nodeath){
-      if (!S._doomNoted){ S._doomNoted = true; log("[DEBUG] LOSS CONDITION: the impending doom arrived at turn " + DOOM_LIMIT + " — normally GAME OVER. (invincible: it grumbles and spares you)", "bad"); }
-      return;
-    }
     S.over = true;
     log("The impending doom finally arrives. It is large, it is hungry, and it has opinions about trespassers. Nav-Comp's last words: 'I did try to tell them.'\n\n☠ GAME OVER. ☠", "bad");
     refresh();
@@ -1105,9 +1085,6 @@ function checkDoom(){
    SECTION: INPUT
    ========================================================== */
 document.addEventListener("keydown", e => {
-  // Ignore gameplay keys until the intro overlay is dismissed (i.e. the game has started).
-  const ov = $("introOverlay");
-  if (ov && ov.style.display !== "none") return;
   if (S.over) return;
   const k = e.key.toLowerCase();
   if (S.mode === "decode"){
@@ -1200,34 +1177,18 @@ function skipIntro(){
   $("storyPanel").style.display = "block";
 }
 
-function beginGame(debug){
-  S.nodeath = !!debug;
+function beginGame(){
   $("introOverlay").style.display = "none";
   $("gameWrap").style.display = "block";
   initWorld();
   boot();
-  if (S.nodeath){
-    log("// DEBUG MODE ENGAGED — invincibility ON. Nothing can kill you. //", "sys");
-    log("Loss conditions (disabled, shown for reference): (1) HEALTH hits 0, (2) drowning — entering deep water without a raft, (3) the impending-doom clock reaching 100%. If one trips you'll get a [DEBUG] notice in the log instead of dying.", "nav");
-  }
 }
 
 function playIntro(){
-  let cmdBuf = "";
   document.addEventListener("keydown", function onIntroEnter(e){
-    if ($("storyPanel").style.display === "none") return;
-    if (e.key === "Enter"){
+    if (e.key === "Enter" && $("storyPanel").style.display !== "none"){
       document.removeEventListener("keydown", onIntroEnter);
-      beginGame(false);
-      return;
-    }
-    // Type "/d" (instead of Enter) to start in no-death debug mode.
-    if (DEBUG_MODES_ENABLED && e.key.length === 1){
-      cmdBuf = (cmdBuf + e.key).slice(-2);
-      if (cmdBuf === "/d"){
-        document.removeEventListener("keydown", onIntroEnter);
-        beginGame(true);
-      }
+      beginGame();
     }
   });
   $("cutsceneStage").innerHTML = buildIntroSVG();

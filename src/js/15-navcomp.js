@@ -34,6 +34,10 @@ function attemptEscape(){
 function checkDoom(){
   const f = S.turn / DOOM_LIMIT;
   if (S.turn >= DOOM_LIMIT){
+    if (S.nodeath){
+      if (!S._doomNoted){ S._doomNoted = true; log("[DEBUG] LOSS CONDITION: the impending doom arrived at turn " + DOOM_LIMIT + " — normally GAME OVER. (invincible: it grumbles and spares you)", "bad"); }
+      return;
+    }
     S.over = true;
     log("The impending doom finally arrives. It is large, it is hungry, and it has opinions about trespassers. Nav-Comp's last words: 'I did try to tell them.'\n\n☠ GAME OVER. ☠", "bad");
     refresh();

@@ -39,7 +39,7 @@ const SPECIAL = {
    comps:[{t:"col",id:"cola",name:"Warm TAB-ish Cola",kind:"water",icon:"🥤",consumable:true,effects:{hydration:20,health:-3},grab:"You crack a warm, flat, vaguely radioactive cola. (+20 hydration, -3 health)"},
           {t:"man",id:"vendor",name:"Vending Machine",icon:"📟",verb:"Use the vending machine"},
           {t:"col",id:"green_keycard",name:"Green Keycard",kind:"part",icon:"💳",required:true,hidden:true,grab:"You pluck the glowing GREEN KEYCARD from the tray. (repair part)"}]},
- "1,1.5":{id:"HATCH",name:"Cargo Hatch",terrain:"indoor",env:"indoor",light:"lit",
+ "0,2":{id:"HATCH",name:"Cargo Hatch",terrain:"indoor",env:"indoor",light:"lit",
    desc:"A chunk of your pod's cargo section, hatch jammed shut, emergency lighting flickering inside.",
    comps:[{t:"man",id:"hatch",name:"Jammed Cargo Hatch",icon:"🚪",verb:"Override the hatch lock"},
           {t:"col",id:"coolant_cell",name:"Coolant Cell",kind:"part",icon:"🧊",required:true,hidden:true,grab:"You unstrap the COOLANT CELL from the bulkhead. (repair part)"},
@@ -49,7 +49,7 @@ const SPECIAL = {
    comps:[{t:"man",id:"locker",name:"Locked Footlocker",icon:"🧰",verb:"the footlocker"},
           {t:"col",id:"puffs",name:"Family-Size Cheese Puffs",kind:"food",icon:"🧀",consumable:true,effects:{health:8},grab:"You demolish a bag of radioactively orange cheese puffs. (+8 health)"},
           {t:"col",id:"flux_coil",name:"Flux Coil",kind:"part",icon:"🌀",required:true,hidden:true,grab:"You lift the FLUX COIL from its foam nest. (repair part)"}]},
- "2,1":{id:"LAKESHORE",name:"Lakeshore",terrain:"forest",env:"outdoor",light:"lit",
+ "1,-0.5":{id:"LAKESHORE",name:"Lakeshore",terrain:"forest",env:"outdoor",light:"lit",
    desc:"A pebbled shore. Driftwood lines the waterline. A cluster of alien plants crowds the bank — enormous waxy pods, each the size of a pillow.",
    comps:[{t:"col",id:"driftwood",name:"Bundle of Driftwood",kind:"mat",icon:"🪵",grab:"You gather a bundle of sun-bleached driftwood. (raft material)"},
           {t:"col",id:"dopehtesu",name:"Dopehtesu Pods",kind:"mat",icon:"🌿",grab:"You harvest a cluster of Dopehtesu pods — huge, waxy, absurdly buoyant. The locals (if there were any) would probably have a name for them. (raft material)"}]},
@@ -63,7 +63,7 @@ const SPECIAL = {
    desc:"You are out on the misty lake, riding low on your raft. Something waterlogged bobs against the hull.",
    comps:[{t:"col",id:"lake_water",name:"Lake Water",kind:"water",icon:"🌊",consumable:true,effects:{hydration:30,health:-6},grab:"You scoop lake water over the side. Brackish, with a hint of ozone. (+30 hydration, -6 health)"},
           {t:"col",id:"repair_manual",name:"Ship Repair Manual",kind:"part",icon:"📖",grab:"You fish out a waterlogged but readable SHIP REPAIR MANUAL. It lists what the transport needs: Coolant Cell, Flux Coil, Green Keycard. Now you know. (required reading)"}]},
- "3,0.5":{id:"DRONE",name:"Crashed Survey Drone",terrain:"ruin",env:"outdoor",light:"lit",
+ "2,2":{id:"DRONE",name:"Crashed Survey Drone",terrain:"ruin",env:"outdoor",light:"lit",
    desc:"On the far shore, a crashed survey drone lies half-buried, panels splayed like a dead beetle.",
    comps:[{t:"man",id:"drone",name:"Drone Memory Core",icon:"📡",verb:"Read the drone's last log"},
           {t:"col",id:"ration",name:"Emergency Ration Cache",kind:"food",icon:"🥫",consumable:true,effects:{health:20,hydration:15},grab:"You crack the drone's ration cache. Actual edible food and a sealed canteen. (+20 health, +15 hydration)"}]},
@@ -82,13 +82,17 @@ const SPECIAL = {
 
 /* Natural barriers (rivers, mountains, thicket) — undirected, by coord-key */
 const BLOCKED = [
-  // River: flows in from the east, rings the DRONE's islet and merges into the
-  // lake, then drains out to the southwest. Leaves the drone reachable only by raft.
-  {a:"3,-0.5",b:"3,0.5",type:"river"}, {a:"4,0",b:"3,0.5",type:"river"}, {a:"4,1",b:"3,0.5",type:"river"},
-  {a:"3,1.5",b:"3,0.5",type:"river"}, {a:"2,1",b:"3,0.5",type:"river"},
+  // River: flows in from the east (4,0 -> 3,0.5), through the lake, then drains
+  // southwest (1,0.5 -> 0,1) with a south arm down col 1 (1,1.5 -> 1,2.5 -> 1,3.5).
+  // Seals a southern pocket so the DRONE (2,2) is reachable only by raft; all raft
+  // materials live NORTH of the river. Verified winnable by lattice BFS.
+  {a:"4,0",b:"4,1",type:"river"}, {a:"3,0.5",b:"4,1",type:"river"}, {a:"3,0.5",b:"3,1.5",type:"river"},
+  {a:"2,1",b:"3,0.5",type:"river"}, {a:"1,0.5",b:"2,1",type:"river"}, {a:"1,1.5",b:"2,1",type:"river"},
+  {a:"1,1.5",b:"2,2",type:"river"}, {a:"1,2.5",b:"2,2",type:"river"}, {a:"1,2.5",b:"2,3",type:"river"},
+  {a:"1,3.5",b:"2,3",type:"river"},
   {a:"1,0.5",b:"0,1",type:"river"}, {a:"0,1",b:"-1,1.5",type:"river"},
   {a:"-1,-1.5",b:"-2,-1",type:"mountains"}, {a:"-1,-1.5",b:"-2,-2",type:"mountains"}, {a:"-1,-2.5",b:"-2,-2",type:"mountains"},
-  {a:"1,2.5",b:"0,2",type:"thicket"}, {a:"1,2.5",b:"0,3",type:"thicket"},
+  {a:"1,2.5",b:"0,3",type:"thicket"},
 ]; // lake water barriers are implicit: barrierKind() returns "water" for any lake-terrain neighbor
 
 /* Man-made buildings: a building is a set of hex IDs plus an explicit list

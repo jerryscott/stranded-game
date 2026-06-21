@@ -10,3 +10,4 @@ const CIPHER_SHIFT = 7, LOCKER_CODE = "42";
 const DEHYDRATION_DMG = 10, LOW_WARN = 25;
 const REQUIRED = ["coolant_cell", "flux_coil", "green_keycard"];
 const RAFT_MAT = ["driftwood", "vines", "dopehtesu"];
+const DEBUG_MODES_ENABLED = true;  // master toggle for the "/d" no-death start command. Set false in release builds to disable it.

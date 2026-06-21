@@ -74,7 +74,13 @@ function openSwimChoice(dir){
   renderControls();
 }
 function swimDeath(w){
-  S.over = true; S.mode = "play";
+  S.mode = "play";
+  if (S.nodeath){
+    log("[DEBUG] LOSS CONDITION: you swam into the deep " + w + " without a raft — normally GAME OVER by drowning. (invincible: you splash back to shore)", "bad");
+    refresh();
+    return;
+  }
+  S.over = true;
   const ends = [
     "You wade in. Three strokes out, something with far too many eyes wraps around your ankle and pulls. The mist closes over the ripples.",
     "You strike out for the far shore. The current has other plans, and so, apparently, does the thing living in it.",

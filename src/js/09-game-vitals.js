@@ -9,10 +9,15 @@ function applyEffect(eff){
 
 function checkVitals(){
   if (S.health <= 0 && !S.over){
-    S.over = true;
-    log("You sink to the alien dirt and decline to get back up. Nav-Comp's final entry: 'Vitals: nope.'\n\n☠ GAME OVER. ☠", "bad");
-    refresh();
-    return true;
+    if (S.nodeath){
+      S.health = 1;
+      log("[DEBUG] LOSS CONDITION: your HEALTH hit 0 — normally GAME OVER. (invincible: clinging to 1 HP)", "bad");
+    } else {
+      S.over = true;
+      log("You sink to the alien dirt and decline to get back up. Nav-Comp's final entry: 'Vitals: nope.'\n\n☠ GAME OVER. ☠", "bad");
+      refresh();
+      return true;
+    }
   }
   if (S.health <= LOW_WARN && !S._hpW){ S._hpW = true; log("You're in rough shape. Find something restorative before you keel over.", "bad"); }
   else if (S.health > LOW_WARN) S._hpW = false;

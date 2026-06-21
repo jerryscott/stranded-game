@@ -2,6 +2,9 @@
    SECTION: INPUT
    ========================================================== */
 document.addEventListener("keydown", e => {
+  // Ignore gameplay keys until the intro overlay is dismissed (i.e. the game has started).
+  const ov = $("introOverlay");
+  if (ov && ov.style.display !== "none") return;
   if (S.over) return;
   const k = e.key.toLowerCase();
   if (S.mode === "decode"){
