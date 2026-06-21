@@ -4,6 +4,11 @@
    and get a pristine map without any leftover mutated flags.)
    ========================================================== */
 const HEXES = {}, COORD2ID = {}, BMAP = {};
+const BLDG = {}; // building interiors, rebuilt fresh each world init by initBuildings()
+// Active map context: the overworld by default, swapped to a building's interior
+// by enterBuilding() and back by exitBuilding(). All hex/edge access in helpers.js
+// and renderMap goes through these three, so the whole stack works in either.
+let activeHexes = HEXES, activeC2I = COORD2ID, activeBmap = BMAP;
 
 function rng(str){
   let h = 2166136261;
@@ -65,6 +70,27 @@ function applyBuildingWalls(){
   }
 }
 
+/* Clone each building interior fresh (the way buildLattice clones SPECIAL) so
+   restart() always gets pristine rooms. Each interior becomes its own little map
+   context: hexes keyed by id, a coord->id index, and an edge map. */
+function initBuildings(){
+  for (const k in BLDG) delete BLDG[k];
+  for (const id in INTERIORS){
+    const def = INTERIORS[id];
+    const rooms = JSON.parse(JSON.stringify(def.rooms));
+    const hexes = {}, c2i = {}, bmap = {};
+    for (const key in rooms){
+      const hx = rooms[key];
+      const [x, y] = key.split(",").map(Number);
+      hx.pos = { x, y }; hx.disc = false;
+      hexes[hx.id] = hx;
+      c2i[key] = hx.id;
+    }
+    for (const e of (def.blocked || [])) bmap[[e.a, e.b].sort().join("|")] = e.type;
+    BLDG[id] = { hexes, c2i, bmap, entry:def.entry, overworld:def.overworld };
+  }
+}
+
 function initWorld(){
   for (const k in HEXES) delete HEXES[k];
   for (const k in COORD2ID) delete COORD2ID[k];
@@ -72,4 +98,6 @@ function initWorld(){
   buildLattice();
   applyBlockedEdges();
   applyBuildingWalls();
+  initBuildings();
+  activeHexes = HEXES; activeC2I = COORD2ID; activeBmap = BMAP; // always (re)start on the overworld
 }

@@ -31,14 +31,9 @@ const SPECIAL = {
    desc:"A clear spring burbles over smooth stones in a shaft of sun. One stone is suspiciously, comically heavy.",
    comps:[{t:"col",id:"spring_water",name:"Clean Spring Water",kind:"water",icon:"💧",consumable:true,renewable:true,effects:{hydration:45,health:5},grab:"You drink deep. Cold, clean, faintly minty. (+45 hydration, +5 health)"},
           {t:"col",id:"rock",name:"Suspiciously Heavy Rock",kind:"tool",icon:"🪨",grab:"You pocket the suspiciously heavy rock. It has the air of an object with One Job."}]},
- "1,-1.5":{id:"BUILD_GEN",name:"Generator Room",terrain:"indoor",env:"indoor",light:"dark",
-   desc:"A cinderblock outbuilding, dark and dead. A grimy breaker panel dominates one wall. A faded stencil beside it reads: \"GREEN = genny start.  RED = LIVE MAINS — DO NOT TOUCH.\" There's exactly one door, and you're standing in it, facing the obelisk.",
-   comps:[{t:"man",id:"power",name:"Breaker Panel",icon:"🔌",verb:"Fiddle with the breaker panel"}]},
- "1,-2.5":{id:"BUILD_BREAK",name:"Break Room",terrain:"indoor",env:"indoor",light:"dark",
-   desc:"The other half of the building, through an interior doorway: a moldering break room. A vending machine looms in the corner, screen dark.",
-   comps:[{t:"col",id:"cola",name:"Warm TAB-ish Cola",kind:"water",icon:"🥤",consumable:true,effects:{hydration:20,health:-3},grab:"You crack a warm, flat, vaguely radioactive cola. (+20 hydration, -3 health)"},
-          {t:"man",id:"vendor",name:"Vending Machine",icon:"📟",verb:"Use the vending machine"},
-          {t:"col",id:"green_keycard",name:"Green Keycard",kind:"part",icon:"💳",required:true,hidden:true,grab:"You pluck the glowing GREEN KEYCARD from the tray. (repair part)"}]},
+ "1,-1.5":{id:"GENBUILDING",name:"Cinderblock Outbuilding",terrain:"indoor",env:"outdoor",light:"lit",building:"GENBUILDING",
+   desc:"A windowless cinderblock outbuilding squats in the clearing, a single steel door facing the black obelisk to the southwest. It's dark and dead inside — but a faded stencil by the door promises a generator within.",
+   comps:[]},
  "0,2":{id:"HATCH",name:"Cargo Hatch",terrain:"indoor",env:"indoor",light:"lit",
    desc:"A chunk of your pod's cargo section, hatch jammed shut, emergency lighting flickering inside.",
    comps:[{t:"man",id:"hatch",name:"Jammed Cargo Hatch",icon:"🚪",verb:"Override the hatch lock"},
@@ -101,5 +96,28 @@ const BLOCKED = [
    buildings just declare their own hex set + however many entrances they
    should have — the sealing logic below is generic. */
 const BUILDINGS = [
-  { hexes:["BUILD_GEN","BUILD_BREAK"], entrances:[{hex:"BUILD_GEN", dir:"SW"}] }
+  // Generic multi-hex, wall-sealed overworld buildings. None at the moment —
+  // the generator building is now a sub-map interior (see INTERIORS below).
+  // Kept for future buildings that should occupy real overworld hexes.
 ];
+
+/* Building interiors — sub-maps reached from an overworld hex flagged with a
+   matching `building` id. Each interior is its own little hex map (rooms keyed
+   by coord, exactly like the overworld lattice). `entry` is the room you arrive
+   in; `overworld` is the hex you step back out onto. Cloned fresh by
+   initBuildings(); entered/left via enterBuilding()/exitBuilding(). */
+const INTERIORS = {
+  GENBUILDING: {
+    overworld:"GENBUILDING", entry:"GEN_ROOM",
+    rooms:{
+      "0,0":{id:"GEN_ROOM",name:"Generator Room",terrain:"indoor",env:"indoor",light:"dark",
+        desc:"A dark, dead generator room. A grimy breaker panel dominates one wall; a faded stencil beside it reads: \"GREEN = genny start.  RED = LIVE MAINS — DO NOT TOUCH.\" An interior doorway leads north into the rest of the building.",
+        comps:[{t:"man",id:"power",name:"Breaker Panel",icon:"🔌",verb:"Fiddle with the breaker panel"}]},
+      "0,-1":{id:"GEN_BREAK",name:"Break Room",terrain:"indoor",env:"indoor",light:"dark",
+        desc:"A moldering break room through the interior doorway. A vending machine looms in the corner, screen dark.",
+        comps:[{t:"col",id:"cola",name:"Warm TAB-ish Cola",kind:"water",icon:"🥤",consumable:true,effects:{hydration:20,health:-3},grab:"You crack a warm, flat, vaguely radioactive cola. (+20 hydration, -3 health)"},
+               {t:"man",id:"vendor",name:"Vending Machine",icon:"📟",verb:"Use the vending machine"},
+               {t:"col",id:"green_keycard",name:"Green Keycard",kind:"part",icon:"💳",required:true,hidden:true,grab:"You pluck the glowing GREEN KEYCARD from the tray. (repair part)"}]},
+    }
+  }
+};

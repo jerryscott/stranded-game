@@ -15,7 +15,7 @@ function openPowerChoice(){
 }
 function powerOn(){
   S.power = true; S.mode = "play"; S.choice = null;
-  const m = comp("BUILD_GEN","power"); if (m) m.done = true;
+  const m = comp("GEN_ROOM","power"); if (m) m.done = true;
   log("You throw the green breaker. The generator coughs, catches, and the building shudders awake — lights buzz on, and somewhere next door a vending machine hums to life.", "good");
   refresh();
 }

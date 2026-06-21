@@ -3,7 +3,7 @@
    ========================================================== */
 function freshState(){
   return {
-    cur:"FURROW", turn:0, mode:"play",
+    cur:"FURROW", turn:0, mode:"play", submap:null,
     decoded:false, power:false, hasRaft:false, nodeath:false,
     shift:0, combo:"", choice:null,
     warned:0, over:false,

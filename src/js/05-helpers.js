@@ -2,11 +2,11 @@
    SECTION: HELPERS  (pure, no rendering)
    ========================================================== */
 const $ = id => document.getElementById(id);
-const H = id => HEXES[id];
+const H = id => activeHexes[id]; // active map context (overworld or a building interior)
 
 function posKey(id){ const p = H(id).pos; return p.x + "," + p.y; }
-function neighbor(id, dir){ const p = H(id).pos, d = DIRS[dir]; return COORD2ID[(p.x+d[0]) + "," + (p.y+d[1])] || null; }
-function edgeType(a, b){ return BMAP[[posKey(a), posKey(b)].sort().join("|")] || null; }
+function neighbor(id, dir){ const p = H(id).pos, d = DIRS[dir]; return activeC2I[(p.x+d[0]) + "," + (p.y+d[1])] || null; }
+function edgeType(a, b){ return activeBmap[[posKey(a), posKey(b)].sort().join("|")] || null; }
 
 function barrierKind(id, dir){
   const n = neighbor(id, dir);

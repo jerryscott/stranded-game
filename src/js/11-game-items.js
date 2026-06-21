@@ -32,7 +32,7 @@ function doManipulable(c){
         return;
       }
       c.done = true;
-      { const kc = comp("BUILD_BREAK","green_keycard"); if (kc) kc.hidden = false; }
+      { const kc = comp("GEN_BREAK","green_keycard"); if (kc) kc.hidden = false; }
       log("Powered up, the machine wheezes to life, blinks a cheerful 8-bit smile, and drops something into the tray with a CLUNK: a GREEN KEYCARD. (Grab it.)", "good");
       break;
     case "hatch":

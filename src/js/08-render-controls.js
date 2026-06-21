@@ -19,6 +19,12 @@ function buildActions(){
       }
     }
   });
+  if (h.building && !S.submap){
+    acts.push({ label:"Step inside", fn: () => enterBuilding(h.building) });
+  }
+  if (S.submap){
+    acts.push({ label:"Step back outside", fn: exitBuilding });
+  }
   if (!S.hasRaft && nextToWater(S.cur) && RAFT_MAT.every(has)){
     acts.push({ label:"Lash the driftwood, vines & Dopehtesu pods into a raft", fn: buildRaft });
   }

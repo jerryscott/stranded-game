@@ -89,6 +89,32 @@ function swimDeath(w){
   log(ends[Math.floor(Math.random()*ends.length)] + "\n\n☠ GAME OVER — you drowned (ish). ☠", "bad");
   refresh();
 }
+function enterBuilding(id){
+  const b = BLDG[id];
+  if (!b) return;
+  S.submap = id;
+  activeHexes = b.hexes; activeC2I = b.c2i; activeBmap = b.bmap;
+  S.cur = b.entry;
+  S.turn++;
+  const h = H(S.cur); h.disc = true;
+  const extra = surroundings(S.cur);
+  log("You haul the door open and step inside.\n" + h.desc + (extra ? " " + extra : ""), "you");
+  if (checkVitals()) return;
+  checkDoom();
+  refresh();
+}
+function exitBuilding(){
+  const b = BLDG[S.submap];
+  S.submap = null;
+  activeHexes = HEXES; activeC2I = COORD2ID; activeBmap = BMAP;
+  S.cur = b.overworld;
+  S.turn++;
+  const h = H(S.cur), extra = surroundings(S.cur);
+  log("You step back out into the open air, at the " + h.name + "." + (extra ? " " + extra : ""), "you");
+  if (checkVitals()) return;
+  checkDoom();
+  refresh();
+}
 function buildRaft(){
   S.hasRaft = true;
   S.inv = S.inv.filter(i => !RAFT_MAT.includes(i.id));

@@ -110,7 +110,7 @@ function waterBand(id, d){
 }
 
 function renderMap(){
-  const disc = Object.keys(HEXES).filter(k => H(k).disc);
+  const disc = Object.keys(activeHexes).filter(k => H(k).disc);
   const cs = disc.map(center);
   let minx = Math.min(...cs.map(c=>c.x)), maxx = Math.max(...cs.map(c=>c.x));
   let miny = Math.min(...cs.map(c=>c.y)), maxy = Math.max(...cs.map(c=>c.y));
