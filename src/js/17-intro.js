@@ -1,6 +1,8 @@
 /* ==========================================================
    SECTION: INTRO CUTSCENE
    ========================================================== */
+let introKeyHandler = null;  // armed by playIntro(), torn down by beginGame() on EVERY start path
+
 function buildIntroSVG(){
   const W = 400, Ht = 200;
   let s = `<svg viewBox="0 0 ${W} ${Ht}" xmlns="http://www.w3.org/2000/svg" id="introSvg">`;
@@ -64,6 +66,10 @@ function skipIntro(){
 }
 
 function beginGame(debug){
+  // Single chokepoint for every start path (Enter, "debug" word, button click):
+  // always tear down the intro keydown listener so Enter can't re-run the intro
+  // mid-game (it's the decoder/combo confirm key) and wipe the session.
+  if (introKeyHandler){ document.removeEventListener("keydown", introKeyHandler); introKeyHandler = null; }
   S.nodeath = !!debug;
   $("introOverlay").style.display = "none";
   $("gameWrap").style.display = "block";
@@ -78,22 +84,16 @@ function beginGame(debug){
 function playIntro(){
   let cmdBuf = "";
   const DEBUG_TRIGGER = "debug";  // type this word on the start screen to launch no-death mode
-  document.addEventListener("keydown", function onIntroEnter(e){
+  introKeyHandler = function (e){
     if ($("storyPanel").style.display === "none") return;
-    if (e.key === "Enter"){
-      document.removeEventListener("keydown", onIntroEnter);
-      beginGame(false);
-      return;
-    }
+    if (e.key === "Enter"){ beginGame(false); return; }  // beginGame() handles listener teardown
     // Type the debug trigger word (instead of Enter) to start in no-death mode.
     if (DEBUG_MODES_ENABLED && e.key.length === 1){
       cmdBuf = (cmdBuf + e.key.toLowerCase()).slice(-DEBUG_TRIGGER.length);
-      if (cmdBuf === DEBUG_TRIGGER){
-        document.removeEventListener("keydown", onIntroEnter);
-        beginGame(true);
-      }
+      if (cmdBuf === DEBUG_TRIGGER) beginGame(true);
     }
-  });
+  };
+  document.addEventListener("keydown", introKeyHandler);
   $("cutsceneStage").innerHTML = buildIntroSVG();
   $("cutsceneStage").addEventListener("animationend", e => {
     if (e.animationName === "stageFadeOut") skipIntro();
