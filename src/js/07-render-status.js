@@ -30,7 +30,7 @@ function renderVMeters(){
 
 function renderStatus(){
   const h = H(S.cur);
-  $("locName").textContent = h.name;
+  $("locName").textContent = h.name + "  [" + h.pos.x + "," + h.pos.y + "]";
   $("terrBadge").textContent = TERRAIN[h.terrain].label.toUpperCase();
   $("envBadge").textContent = h.env === "outdoor" ? "OUTDOORS" : "INDOORS";
   $("lightBadge").textContent = h.light === "lit" ? "WELL-LIT" : "DARK";
