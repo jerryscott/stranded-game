@@ -77,6 +77,7 @@ function beginGame(debug){
 
 function playIntro(){
   let cmdBuf = "";
+  const DEBUG_TRIGGER = "debug";  // type this word on the start screen to launch no-death mode
   document.addEventListener("keydown", function onIntroEnter(e){
     if ($("storyPanel").style.display === "none") return;
     if (e.key === "Enter"){
@@ -84,10 +85,10 @@ function playIntro(){
       beginGame(false);
       return;
     }
-    // Type "/d" (instead of Enter) to start in no-death debug mode.
+    // Type the debug trigger word (instead of Enter) to start in no-death mode.
     if (DEBUG_MODES_ENABLED && e.key.length === 1){
-      cmdBuf = (cmdBuf + e.key).slice(-2);
-      if (cmdBuf === "/d"){
+      cmdBuf = (cmdBuf + e.key.toLowerCase()).slice(-DEBUG_TRIGGER.length);
+      if (cmdBuf === DEBUG_TRIGGER){
         document.removeEventListener("keydown", onIntroEnter);
         beginGame(true);
       }
